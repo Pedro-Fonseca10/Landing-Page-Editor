@@ -4,7 +4,5 @@ import AppRouter from './routes/AppRouter.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <AppRouter />
-  </React.StrictMode>,
+  <AppRouter />
 )
