@@ -1,8 +1,12 @@
-import { render, screen } from "@testing-library/react";
-import "@testing-library/jest-dom";
-import Login from "../pages/Login";
+import { test, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import * as matchers from '@testing-library/jest-dom/matchers';
 
-test("renderiza o botão Entrar", () => {
+expect.extend(matchers);
+
+import Login from '../pages/Login';
+
+test('renderiza o botão Entrar', () => {
   render(<Login />);
-  expect(screen.getByText("Entrar")).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /entrar/i })).toBeInTheDocument();
 });
