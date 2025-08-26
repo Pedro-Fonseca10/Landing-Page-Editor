@@ -1,2 +1,12 @@
-# PerfectLandingPage
-PerfectLandingPage Plataforma web desenvolvida no contexto da disciplina CSI-28 – Fundamentos de Engenharia de Software (ITA, 2025). O sistema tem como objetivo permitir a criação rápida e personalizada de landing pages a partir de modelos pré-definidos, possibilitando que membros da ITA Jr configurem textos, imagens, cores e CTAs de forma prática.
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
