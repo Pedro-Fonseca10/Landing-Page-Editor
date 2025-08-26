@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import { load, save } from "../../lib/storage"
 import { uid } from "../../lib/uid"
 import { TEMPLATES } from "../templates/catalog"
+import { exportLandingPageZip } from "./exporter"
+import { makeSlug } from "./public"
 
 export default function LandingPagesPage() {
   const [clientes, setClientes] = useState([])
@@ -26,10 +28,11 @@ export default function LandingPagesPage() {
       persist(list.map(lp => (lp.id === form.id ? { ...lp, ...form } : lp)))
     } else {
       persist([{ id: uid(), ...form, content: undefined }, ...list])
+      persist([{ id: uid(), ...form, slug: makeSlug(form.titulo, uid()), content: undefined }, ...list])
     }
     setForm({ id: null, titulo: "", id_cliente: "", id_template: "saas" })
   }
-  
+
   const delOne = (lpId) => persist(list.filter(lp => lp.id !== lpId))
 
   const clientesById = useMemo(
@@ -99,6 +102,8 @@ export default function LandingPagesPage() {
             <div className="flex gap-2">
               <Link className="border rounded px-3 py-1" to={`/lps/${lp.id}/edit`}>Editar</Link>
               <Link className="border rounded px-3 py-1" to={`/preview/${lp.id}`}>Visualizar</Link>
+              <button className="border rounded px-3 py-1" onClick={() => exportLandingPageZip(lp)}>Exportar</button>
+              {lp.slug && <a className="border rounded px-3 py-1" href={`/p/${lp.slug}`} target="_blank" rel="noreferrer">Abrir público</a>}
               <button className="border rounded px-3 py-1" onClick={() => delOne(lp.id)}>Excluir</button>
             </div>
           </div>

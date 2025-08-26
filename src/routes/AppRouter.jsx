@@ -13,6 +13,9 @@ import MetricsPage from "../features/analytics/MetricsPage"
 
 import PublicPage from "../features/lps/PublicPage"
 
+import GatewayMock from "../features/payments/GatewayMock"
+import PaymentCallback from "../features/payments/PaymentCallback"
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -27,6 +30,8 @@ export default function AppRouter() {
           <Route path="/preview/:id" element={<ProtectedRoute><LandingPagePreview /></ProtectedRoute>} />
           <Route path="/metrics" element={<ProtectedRoute><MetricsPage /></ProtectedRoute>} />
           <Route path="/lp/:slug" element={<PublicPage />} />
+          <Route path="/pay/:orderId" element={<GatewayMock />} />
+          <Route path="/payment/callback" element={<PaymentCallback />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

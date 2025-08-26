@@ -7,7 +7,7 @@ export default function Dashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link to="/clients" className="border rounded-xl p-4 block">Clientes</Link>
         <Link to="/lps" className="border rounded-xl p-4 block">Landing Pages</Link>
-        <div className="border rounded-xl p-4">Métricas</div>
+        <Link to="/metrics" className="border rounded-xl p-4 block">Métricas</Link>
       </div>
     </div>
   )

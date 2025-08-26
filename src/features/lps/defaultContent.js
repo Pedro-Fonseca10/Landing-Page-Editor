@@ -6,4 +6,5 @@ export const defaultContent = {
   body: "Texto da oferta, benefícios e prova social.",
   ctaText: "Quero saber mais",
   ctaHref: "#",
+  price: 0
 }
