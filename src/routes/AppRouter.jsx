@@ -9,6 +9,10 @@ import LandingPagesPage from "../features/lps/LandingPagesPage"
 import LandingPageEditor from "../features/lps/LandingPageEditor"
 import LandingPagePreview from "../features/lps/LandingPagePreview"
 
+import MetricsPage from "../features/analytics/MetricsPage"
+
+import PublicPage from "../features/lps/PublicPage"
+
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -21,6 +25,8 @@ export default function AppRouter() {
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/lps/:id/edit" element={<ProtectedRoute><LandingPageEditor /></ProtectedRoute>} />
           <Route path="/preview/:id" element={<ProtectedRoute><LandingPagePreview /></ProtectedRoute>} />
+          <Route path="/metrics" element={<ProtectedRoute><MetricsPage /></ProtectedRoute>} />
+          <Route path="/lp/:slug" element={<PublicPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
