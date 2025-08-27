@@ -64,6 +64,7 @@ export default function TemplateRenderer({ lp }) {
   // Selecione a renderização pelo id_template
   switch (lp.id_template) {
     case "saas":
+    case "saas b2b":
       return <SaaSTemplate lp={lp} />
     default: {
       // Fallback simples (o que já existia previamente):

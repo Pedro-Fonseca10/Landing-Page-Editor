@@ -4,8 +4,8 @@ import Dashboard from "../pages/Dashboard"
 import { AuthProvider } from "../features/auth/AuthProvider"
 import ProtectedRoute from "../features/auth/ProtectedRoute"
 import ClientsPage from "../features/clients/ClientsPage"
-import LandingPagesPage from "../features/lps/LandingPagesPage"
 
+import LandingPagesPage from "../features/lps/LandingPagesPage"
 import LandingPageEditor from "../features/lps/LandingPageEditor"
 import LandingPagePreview from "../features/lps/LandingPagePreview"
 

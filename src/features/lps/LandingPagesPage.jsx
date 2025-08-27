@@ -101,7 +101,9 @@ export default function LandingPagesPage() {
             </div>
             <div className="flex gap-2">
               <Link className="border rounded px-3 py-1" to={`/lps/${lp.id}/edit`}>Editar</Link>
-              <Link className="border rounded px-3 py-1" to={`/preview/${lp.id}`}>Visualizar</Link>
+              <Link className="border rounded px-3 py-1" to={`/preview/${lp.id}`} state={{ lpId: lp.id }}>
+                Visualizar
+              </Link>
               <button className="border rounded px-3 py-1" onClick={() => exportLandingPageZip(lp)}>Exportar</button>
               {lp.slug && <a className="border rounded px-3 py-1" href={`/p/${lp.slug}`} target="_blank" rel="noreferrer">Abrir público</a>}
               <button className="border rounded px-3 py-1" onClick={() => delOne(lp.id)}>Excluir</button>
