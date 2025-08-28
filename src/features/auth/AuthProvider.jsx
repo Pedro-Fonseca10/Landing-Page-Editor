@@ -6,7 +6,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const login = (email, password) => {
     if (email === "admin" && password === "123") setUser({ email, role: "admin" })
-    else if (email === "membro@ita.br" && password === "123456") setUser({ email, role: "member" })
+    else if (email === "membro" && password === "123") setUser({ email, role: "member" })
     else throw new Error("Credenciais inválidas")
   }
   const logout = () => setUser(null)

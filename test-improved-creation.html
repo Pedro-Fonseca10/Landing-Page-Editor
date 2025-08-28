@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Criação Melhorada - PerfectLandingPage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; margin: 5px 0; font-family: monospace; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .test-pass { background: #d4edda; border: 1px solid #c3e6cb; }
+        .test-fail { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .data-display { background: #e9ecef; padding: 10px; border-radius: 3px; font-family: monospace; margin: 10px 0; }
+        .form-section { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .error-display { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; padding: 10px; border-radius: 3px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Criação Melhorada - PerfectLandingPage</h1>
+        
+        <div class="section">
+            <h3>Formulário de Criação de Cliente</h3>
+            <div class="form-section">
+                <input type="text" id="cliente-nome" placeholder="Nome do Cliente" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px;">
+                <input type="text" id="cliente-setor" placeholder="Setor (opcional)" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px;">
+                <button class="btn btn-success" onclick="createCliente()">Criar Cliente</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Formulário de Criação de Landing Page</h3>
+            <div class="form-section">
+                <input type="text" id="lp-titulo" placeholder="Título da Landing Page" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px;">
+                <select id="lp-cliente" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="">Selecione um Cliente</option>
+                </select>
+                <select id="lp-template" style="width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="saas">SaaS</option>
+                    <option value="evento">Evento</option>
+                    <option value="d2c">D2C</option>
+                    <option value="portfolio">Portfólio</option>
+                </select>
+                <button class="btn btn-success" onclick="createLandingPage()">Criar Landing Page</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h3>Testes Automáticos</h3>
+            <button class="btn btn-primary" onclick="runImprovedTests()">Executar Testes Melhorados</button>
+            <button class="btn btn-warning" onclick="testRapidCreation()">Testar Criação Rápida</button>
+            <button class="btn btn-danger" onclick="clearAllData()">Limpar Todos os Dados</button>
+        </div>
+        
+        <div class="section">
+            <h3>Dados Atuais</h3>
+            <div id="current-data"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Resultados dos Testes</h3>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Logs Detalhados</h3>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        const k = (name) => `plp:${name}`
+        let errorMessage = null
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs')
+            const logEntry = document.createElement('div')
+            logEntry.className = `log ${type}`
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
+        }
+        
+        // Função uid melhorada (como no projeto)
+        function uid() {
+            const timestamp = Date.now().toString(36)
+            const random1 = Math.random().toString(36).slice(2, 10)
+            const random2 = Math.random().toString(36).slice(2, 10)
+            const performance = performance?.now?.()?.toString(36) || Math.random().toString(36).slice(2, 8)
+            
+            return `${timestamp}-${random1}-${random2}-${performance}`
+        }
+        
+        // Função para verificar se um ID já existe em uma lista
+        function isUniqueId(id, existingIds) {
+            return !existingIds.includes(id)
+        }
+        
+        // Função para gerar ID único garantindo que não existe na lista
+        function generateUniqueId(existingIds = []) {
+            let attempts = 0
+            const maxAttempts = 100
+            
+            while (attempts < maxAttempts) {
+                const newId = uid()
+                if (isUniqueId(newId, existingIds)) {
+                    return newId
+                }
+                attempts++
+            }
+            
+            // Fallback: usar timestamp + contador se todas as tentativas falharem
+            return `fallback-${Date.now()}-${existingIds.length}`
+        }
+        
+        function load(name, fallback = []) {
+            try {
+                const data = localStorage.getItem(k(name))
+                const parsed = JSON.parse(data ?? "null") ?? fallback
+                return parsed
+            } catch (error) {
+                log(`Erro ao carregar ${name}: ${error.message}`, 'error')
+                return fallback
+            }
+        }
+        
+        function save(name, data) {
+            localStorage.setItem(k(name), JSON.stringify(data))
+        }
+        
+        function updateClienteSelect() {
+            const select = document.getElementById('lp-cliente')
+            const clientes = load("clientes", [])
+            
+            select.innerHTML = '<option value="">Selecione um Cliente</option>'
+            clientes.forEach(cliente => {
+                const option = document.createElement('option')
+                option.value = cliente.id
+                option.textContent = `${cliente.nome} (${cliente.setor || 'Sem setor'})`
+                select.appendChild(option)
+            })
+        }
+        
+        function showError(message) {
+            errorMessage = message
+            log(`❌ ERRO: ${message}`, 'error')
+            displayCurrentData()
+        }
+        
+        function createCliente() {
+            const nome = document.getElementById('cliente-nome').value.trim()
+            const setor = document.getElementById('cliente-setor').value.trim()
+            
+            if (!nome) {
+                showError('Por favor, insira um nome para o cliente')
+                return
+            }
+            
+            log(`=== CRIANDO CLIENTE ===`)
+            log(`Nome: ${nome}`)
+            log(`Setor: ${setor || 'Não informado'}`)
+            
+            const clientes = load("clientes", [])
+            
+            // Verificar se já existe um cliente com o mesmo nome
+            const existingCliente = clientes.find(c => 
+                c.nome.toLowerCase() === nome.toLowerCase()
+            )
+            
+            if (existingCliente) {
+                showError(`Já existe um cliente com o nome "${nome}"`)
+                return
+            }
+            
+            // Gerar ID único garantindo que não existe na lista
+            const existingIds = clientes.map(c => c.id)
+            const newId = generateUniqueId(existingIds)
+            
+            log(`ID gerado: ${newId}`)
+            
+            const novoCliente = {
+                id: newId,
+                nome: nome,
+                setor: setor
+            }
+            
+            clientes.push(novoCliente)
+            save("clientes", clientes)
+            
+            log(`✅ Cliente criado com sucesso! Total de clientes: ${clientes.length}`, 'success')
+            
+            // Limpar formulário
+            document.getElementById('cliente-nome').value = ''
+            document.getElementById('cliente-setor').value = ''
+            
+            // Atualizar select e display
+            updateClienteSelect()
+            displayCurrentData()
+        }
+        
+        function createLandingPage() {
+            const titulo = document.getElementById('lp-titulo').value.trim()
+            const idCliente = document.getElementById('lp-cliente').value
+            const template = document.getElementById('lp-template').value
+            
+            if (!titulo) {
+                showError('Por favor, insira um título para a landing page')
+                return
+            }
+            
+            if (!idCliente) {
+                showError('Por favor, selecione um cliente')
+                return
+            }
+            
+            log(`=== CRIANDO LANDING PAGE ===`)
+            log(`Título: ${titulo}`)
+            log(`Cliente ID: ${idCliente}`)
+            log(`Template: ${template}`)
+            
+            const lps = load("lps", [])
+            const clientes = load("clientes", [])
+            
+            // Verificar se já existe uma LP com o mesmo título para o mesmo cliente
+            const existingLp = lps.find(lp => 
+                lp.titulo.toLowerCase() === titulo.toLowerCase() && 
+                lp.id_cliente === idCliente
+            )
+            
+            if (existingLp) {
+                showError(`Já existe uma landing page com o título "${titulo}" para este cliente`)
+                return
+            }
+            
+            // Gerar ID único garantindo que não existe na lista
+            const existingIds = lps.map(lp => lp.id)
+            const newId = generateUniqueId(existingIds)
+            
+            log(`ID gerado: ${newId}`)
+            
+            const novaLP = {
+                id: newId,
+                titulo: titulo,
+                id_cliente: idCliente,
+                id_template: template,
+                content: undefined
+            }
+            
+            lps.push(novaLP)
+            save("lps", lps)
+            
+            log(`✅ Landing Page criada com sucesso! Total de LPs: ${lps.length}`, 'success')
+            
+            // Limpar formulário
+            document.getElementById('lp-titulo').value = ''
+            document.getElementById('lp-cliente').value = ''
+            
+            // Atualizar display
+            displayCurrentData()
+        }
+        
+        function runImprovedTests() {
+            log("=== INICIANDO TESTES MELHORADOS ===", 'info')
+            
+            // Limpar resultados anteriores
+            document.getElementById('test-results').innerHTML = ''
+            
+            // Teste 1: Verificar se há clientes
+            const clientes = load("clientes", [])
+            if (clientes.length === 0) {
+                log("❌ Nenhum cliente encontrado. Crie clientes primeiro.", 'error')
+                addTestResult("Verificação de Clientes", false, "Nenhum cliente encontrado")
+                return
+            }
+            
+            log(`✅ ${clientes.length} clientes encontrados`, 'success')
+            addTestResult("Verificação de Clientes", true, `${clientes.length} clientes encontrados`)
+            
+            // Teste 2: Verificar se há landing pages
+            const lps = load("lps", [])
+            if (lps.length === 0) {
+                log("❌ Nenhuma landing page encontrada. Crie landing pages primeiro.", 'error')
+                addTestResult("Verificação de Landing Pages", false, "Nenhuma landing page encontrada")
+                return
+            }
+            
+            log(`✅ ${lps.length} landing pages encontradas`, 'success')
+            addTestResult("Verificação de Landing Pages", true, `${lps.length} landing pages encontradas`)
+            
+            // Teste 3: Verificar vinculação cliente-LP
+            let lpsVinculadas = 0
+            let lpsSemVinculo = 0
+            
+            lps.forEach((lp, index) => {
+                const cliente = clientes.find(c => c.id === lp.id_cliente)
+                if (cliente) {
+                    lpsVinculadas++
+                    log(`✅ LP ${index + 1}: "${lp.titulo}" vinculada ao cliente "${cliente.nome}"`, 'success')
+                } else {
+                    lpsSemVinculo++
+                    log(`❌ LP ${index + 1}: "${lp.titulo}" SEM VÍNCULO com cliente ID: ${lp.id_cliente}`, 'error')
+                }
+            })
+            
+            if (lpsSemVinculo === 0) {
+                log(`🎉 TODAS as ${lpsVinculadas} landing pages estão vinculadas a clientes!`, 'success')
+                addTestResult("Vinculação Cliente-LP", true, `${lpsVinculadas} LPs vinculadas`)
+            } else {
+                log(`⚠️ ${lpsVinculadas} LPs vinculadas, ${lpsSemVinculo} LPs sem vínculo`, 'warning')
+                addTestResult("Vinculação Cliente-LP", false, `${lpsVinculadas} vinculadas, ${lpsSemVinculo} sem vínculo`)
+            }
+            
+            // Teste 4: Verificar IDs únicos
+            const lpIds = lps.map(lp => lp.id)
+            const uniqueIds = [...new Set(lpIds)]
+            
+            if (lpIds.length === uniqueIds.length) {
+                log("✅ Todos os IDs de landing pages são únicos", 'success')
+                addTestResult("IDs Únicos", true, "Todos os IDs são únicos")
+            } else {
+                log("❌ IDs duplicados detectados!", 'error')
+                const duplicates = lpIds.filter((id, index) => lpIds.indexOf(id) !== index)
+                log(`IDs duplicados: ${duplicates.join(', ')}`, 'error')
+                addTestResult("IDs Únicos", false, "IDs duplicados detectados")
+            }
+            
+            // Teste 5: Verificar formato dos IDs
+            const validFormat = lpIds.every(id => id.includes('-') && id.length > 10)
+            if (validFormat) {
+                log("✅ Formato dos IDs é válido", 'success')
+                addTestResult("Formato dos IDs", true, "Formato válido")
+            } else {
+                log("❌ Formato dos IDs é inválido", 'error')
+                addTestResult("Formato dos IDs", false, "Formato inválido")
+            }
+        }
+        
+        function testRapidCreation() {
+            log("=== TESTANDO CRIAÇÃO RÁPIDA ===", 'info')
+            
+            // Limpar dados existentes
+            localStorage.removeItem(k("clientes"))
+            localStorage.removeItem(k("lps"))
+            
+            const startTime = Date.now()
+            
+            // Criar 5 clientes rapidamente
+            const clientes = []
+            for (let i = 0; i < 5; i++) {
+                const cliente = {
+                    id: generateUniqueId(clientes.map(c => c.id)),
+                    nome: `Cliente Rápido ${i + 1}`,
+                    setor: `Setor ${i + 1}`
+                }
+                clientes.push(cliente)
+                log(`Cliente ${i + 1} criado: ID=${cliente.id}`)
+            }
+            
+            save("clientes", clientes)
+            
+            // Criar 5 landing pages rapidamente
+            const lps = []
+            for (let i = 0; i < 5; i++) {
+                const lp = {
+                    id: generateUniqueId(lps.map(lp => lp.id)),
+                    titulo: `LP Rápida ${i + 1}`,
+                    id_cliente: clientes[i].id,
+                    id_template: ["saas", "evento", "d2c", "portfolio", "waitlist"][i],
+                    content: undefined
+                }
+                lps.push(lp)
+                log(`LP ${i + 1} criada: ID=${lp.id}, Cliente=${lp.id_cliente}`)
+            }
+            
+            save("lps", lps)
+            
+            const endTime = Date.now()
+            const duration = endTime - startTime
+            
+            log(`✅ ${clientes.length} clientes e ${lps.length} landing pages criados em ${duration}ms`, 'success')
+            
+            // Verificar se tudo foi criado corretamente
+            const savedClientes = load("clientes", [])
+            const savedLps = load("lps", [])
+            
+            // Verificar vinculação
+            let vinculacoesCorretas = 0
+            savedLps.forEach((lp, index) => {
+                const cliente = savedClientes.find(c => c.id === lp.id_cliente)
+                if (cliente) {
+                    vinculacoesCorretas++
+                    log(`✅ LP ${index + 1} vinculada ao cliente "${cliente.nome}"`, 'success')
+                } else {
+                    log(`❌ LP ${index + 1} SEM VÍNCULO!`, 'error')
+                }
+            })
+            
+            if (vinculacoesCorretas === savedLps.length) {
+                log(`🎉 TODAS as ${vinculacoesCorretas} vinculações estão corretas!`, 'success')
+                addTestResult("Criação Rápida", true, `${vinculacoesCorretas} vinculações corretas em ${duration}ms`)
+            } else {
+                log(`⚠️ ${vinculacoesCorretas}/${savedLps.length} vinculações corretas`, 'warning')
+                addTestResult("Criação Rápida", false, `${vinculacoesCorretas}/${savedLps.length} vinculações corretas`)
+            }
+            
+            displayCurrentData()
+        }
+        
+        function clearAllData() {
+            log("Limpando todos os dados...", 'warning')
+            localStorage.removeItem(k("clientes"))
+            localStorage.removeItem(k("lps"))
+            log("✅ Todos os dados foram limpos!", 'success')
+            errorMessage = null
+            displayCurrentData()
+            updateClienteSelect()
+        }
+        
+        function addTestResult(testName, passed, message) {
+            const resultsDiv = document.getElementById('test-results')
+            const resultDiv = document.createElement('div')
+            resultDiv.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`
+            resultDiv.innerHTML = `
+                <strong>${testName}:</strong> ${passed ? '✅ PASSOU' : '❌ FALHOU'}<br>
+                <small>${message}</small>
+            `
+            resultsDiv.appendChild(resultDiv)
+        }
+        
+        function displayCurrentData() {
+            const dataDiv = document.getElementById('current-data')
+            const clientes = load("clientes", [])
+            const lps = load("lps", [])
+            
+            let html = ''
+            
+            // Mostrar erro se houver
+            if (errorMessage) {
+                html += `<div class="error-display">❌ ${errorMessage}</div>`
+            }
+            
+            html += '<h4>Clientes:</h4>'
+            if (clientes.length === 0) {
+                html += '<p>Nenhum cliente encontrado.</p>'
+            } else {
+                clientes.forEach((cliente, index) => {
+                    const lpCount = lps.filter(lp => lp.id_cliente === cliente.id).length
+                    html += `
+                        <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;">
+                            <strong>Cliente ${index + 1}:</strong> ${cliente.nome}<br>
+                            <strong>ID:</strong> ${cliente.id}<br>
+                            <strong>Setor:</strong> ${cliente.setor || 'Não informado'}<br>
+                            <strong>Landing Pages:</strong> ${lpCount}
+                        </div>
+                    `
+                })
+            }
+            
+            html += '<h4>Landing Pages:</h4>'
+            if (lps.length === 0) {
+                html += '<p>Nenhuma landing page encontrada.</p>'
+            } else {
+                lps.forEach((lp, index) => {
+                    const cliente = clientes.find(c => c.id === lp.id_cliente)
+                    html += `
+                        <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;">
+                            <strong>LP ${index + 1}:</strong> ${lp.titulo}<br>
+                            <strong>ID:</strong> ${lp.id}<br>
+                            <strong>Template:</strong> ${lp.id_template}<br>
+                            <strong>Cliente:</strong> ${cliente ? cliente.nome : `ID: ${lp.id_cliente} (NÃO ENCONTRADO)`}
+                        </div>
+                    `
+                })
+            }
+            
+            dataDiv.innerHTML = html
+        }
+        
+        // Inicialização
+        updateClienteSelect()
+        displayCurrentData()
+        log("Teste de Criação Melhorada iniciado. Use os formulários para criar clientes e landing pages, ou execute os testes automáticos.")
+    </script>
+</body>
+</html>

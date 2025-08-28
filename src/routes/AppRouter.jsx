@@ -25,13 +25,13 @@ export default function AppRouter() {
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
           <Route path="/lps" element={<ProtectedRoute><LandingPagesPage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/lps/:id/edit" element={<ProtectedRoute><LandingPageEditor /></ProtectedRoute>} />
           <Route path="/preview/:id" element={<ProtectedRoute><LandingPagePreview /></ProtectedRoute>} />
           <Route path="/metrics" element={<ProtectedRoute><MetricsPage /></ProtectedRoute>} />
           <Route path="/lp/:slug" element={<PublicPage />} />
           <Route path="/pay/:orderId" element={<GatewayMock />} />
           <Route path="/payment/callback" element={<PaymentCallback />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

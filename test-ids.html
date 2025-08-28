@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de IDs - PerfectLandingPage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; margin: 5px 0; font-family: monospace; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de IDs - PerfectLandingPage</h1>
+        
+        <div class="section">
+            <h3>Teste de Geração de IDs</h3>
+            <button class="btn btn-primary" onclick="testIdGeneration()">Testar Geração de IDs</button>
+            <button class="btn btn-success" onclick="createTestLPs()">Criar LPs de Teste</button>
+            <button class="btn btn-danger" onclick="clearTestData()">Limpar Dados</button>
+        </div>
+        
+        <div class="section">
+            <h3>Resultados</h3>
+            <div id="results"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Logs</h3>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        const k = (name) => `plp:${name}`
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs')
+            const logEntry = document.createElement('div')
+            logEntry.className = `log ${type}`
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
+        }
+        
+        // Função uid similar à do projeto
+        function uid() {
+            const timestamp = Date.now().toString(36)
+            const random = Math.random().toString(36).slice(2, 10)
+            return `${timestamp}-${random}`
+        }
+        
+        function load(name, fallback = []) {
+            try {
+                const data = localStorage.getItem(k(name))
+                const parsed = JSON.parse(data ?? "null") ?? fallback
+                return parsed
+            } catch (error) {
+                log(`Erro ao carregar ${name}: ${error.message}`, 'error')
+                return fallback
+            }
+        }
+        
+        function save(name, data) {
+            localStorage.setItem(k(name), JSON.stringify(data))
+        }
+        
+        function testIdGeneration() {
+            log("=== TESTE DE GERAÇÃO DE IDs ===")
+            
+            const ids = []
+            for (let i = 0; i < 10; i++) {
+                const id = uid()
+                ids.push(id)
+                log(`ID ${i + 1}: ${id}`)
+            }
+            
+            // Verificar unicidade
+            const uniqueIds = [...new Set(ids)]
+            if (ids.length === uniqueIds.length) {
+                log("✅ Todos os IDs são únicos!", 'success')
+            } else {
+                log("❌ IDs duplicados detectados!", 'error')
+            }
+            
+            // Verificar formato
+            const validFormat = ids.every(id => /^\d+[a-z0-9]+-[a-z0-9]+$/.test(id))
+            if (validFormat) {
+                log("✅ Formato dos IDs é válido", 'success')
+            } else {
+                log("❌ Formato dos IDs é inválido", 'error')
+            }
+        }
+        
+        function createTestLPs() {
+            log("=== CRIANDO LANDING PAGES DE TESTE ===")
+            
+            // Limpar dados existentes
+            localStorage.removeItem(k("lps"))
+            
+            const lps = []
+            const templates = ["saas", "evento", "d2c", "portfolio"]
+            
+            for (let i = 0; i < 4; i++) {
+                const id = uid()
+                const lp = {
+                    id: id,
+                    titulo: `LP Teste ${i + 1} - ${templates[i]}`,
+                    id_cliente: `cliente${i + 1}`,
+                    id_template: templates[i],
+                    content: undefined
+                }
+                lps.push(lp)
+                log(`LP ${i + 1} criada: ID=${id}, Template=${templates[i]}`)
+            }
+            
+            save("lps", lps)
+            log("✅ 4 Landing Pages de teste criadas com sucesso!", 'success')
+            
+            // Verificar se foram salvas corretamente
+            const savedLps = load("lps", [])
+            log(`Verificação: ${savedLps.length} LPs carregadas do storage`)
+            
+            // Testar busca individual
+            savedLps.forEach((lp, index) => {
+                const found = savedLps.find(x => String(x.id) === String(lp.id))
+                if (found) {
+                    log(`✅ LP ${index + 1} encontrada corretamente: ${found.titulo}`)
+                } else {
+                    log(`❌ LP ${index + 1} NÃO encontrada!`, 'error')
+                }
+            })
+            
+            displayResults()
+        }
+        
+        function clearTestData() {
+            log("Limpando dados de teste...")
+            localStorage.removeItem(k("lps"))
+            log("✅ Dados limpos!", 'success')
+            displayResults()
+        }
+        
+        function displayResults() {
+            const resultsDiv = document.getElementById('results')
+            const lps = load("lps", [])
+            
+            if (lps.length === 0) {
+                resultsDiv.innerHTML = '<p>Nenhuma landing page encontrada.</p>'
+                return
+            }
+            
+            let html = '<h4>Landing Pages Armazenadas:</h4>'
+            lps.forEach((lp, index) => {
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;">
+                        <strong>LP ${index + 1}:</strong> ${lp.titulo}<br>
+                        <strong>ID:</strong> ${lp.id}<br>
+                        <strong>Template:</strong> ${lp.id_template}<br>
+                        <strong>Cliente:</strong> ${lp.id_cliente}
+                    </div>
+                `
+            })
+            
+            resultsDiv.innerHTML = html
+        }
+        
+        // Exibir resultados iniciais
+        displayResults()
+        log("Teste de IDs iniciado. Use os botões para testar a funcionalidade.")
+    </script>
+</body>
+</html>

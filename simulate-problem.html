@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação do Problema - PerfectLandingPage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; margin: 5px 0; font-family: monospace; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .test-pass { background: #d4edda; border: 1px solid #c3e6cb; }
+        .test-fail { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulação do Problema - PerfectLandingPage</h1>
+        
+        <div class="section">
+            <h3>Simulação do Problema de Preview</h3>
+            <p>Este teste simula exatamente o que está acontecendo na aplicação:</p>
+            <ul>
+                <li>Cria múltiplas landing pages com templates diferentes</li>
+                <li>Simula o processo de busca por ID</li>
+                <li>Identifica onde está o problema</li>
+            </ul>
+            <button class="btn btn-primary" onclick="runSimulation()">Executar Simulação</button>
+            <button class="btn btn-success" onclick="createTestData()">Criar Dados de Teste</button>
+            <button class="btn btn-danger" onclick="clearData()">Limpar Dados</button>
+        </div>
+        
+        <div class="section">
+            <h3>Resultados dos Testes</h3>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Logs Detalhados</h3>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        const k = (name) => `plp:${name}`
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs')
+            const logEntry = document.createElement('div')
+            logEntry.className = `log ${type}`
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
+        }
+        
+        function uid() {
+            const timestamp = Date.now().toString(36)
+            const random = Math.random().toString(36).slice(2, 10)
+            return `${timestamp}-${random}`
+        }
+        
+        function load(name, fallback = []) {
+            try {
+                const data = localStorage.getItem(k(name))
+                const parsed = JSON.parse(data ?? "null") ?? fallback
+                return parsed
+            } catch (error) {
+                log(`Erro ao carregar ${name}: ${error.message}`, 'error')
+                return fallback
+            }
+        }
+        
+        function save(name, data) {
+            localStorage.setItem(k(name), JSON.stringify(data))
+        }
+        
+        function createTestData() {
+            log("=== CRIANDO DADOS DE TESTE ===")
+            
+            // Criar clientes
+            const clientes = [
+                { id: "cliente1", nome: "Cliente A", setor: "Tecnologia" },
+                { id: "cliente2", nome: "Cliente B", setor: "Saúde" },
+                { id: "cliente3", nome: "Cliente C", setor: "Educação" }
+            ]
+            
+            // Criar landing pages com IDs únicos
+            const lps = [
+                { id: "lp1", titulo: "LP SaaS - Cliente A", id_cliente: "cliente1", id_template: "saas" },
+                { id: "lp2", titulo: "LP Evento - Cliente B", id_cliente: "cliente2", id_template: "evento" },
+                { id: "lp3", titulo: "LP D2C - Cliente C", id_cliente: "cliente3", id_template: "d2c" }
+            ]
+            
+            save("clientes", clientes)
+            save("lps", lps)
+            
+            log("✅ Dados de teste criados com sucesso!", 'success')
+            log(`- ${clientes.length} clientes criados`)
+            log(`- ${lps.length} landing pages criadas`)
+            
+            displayTestResults()
+        }
+        
+        function clearData() {
+            log("Limpando dados...")
+            localStorage.removeItem(k("clientes"))
+            localStorage.removeItem(k("lps"))
+            log("✅ Dados limpos!", 'success')
+            displayTestResults()
+        }
+        
+        function runSimulation() {
+            log("=== INICIANDO SIMULAÇÃO DO PROBLEMA ===")
+            
+            const lps = load("lps", [])
+            if (lps.length === 0) {
+                log("❌ Nenhuma landing page encontrada. Crie dados de teste primeiro.", 'error')
+                return
+            }
+            
+            log(`Simulando preview para ${lps.length} landing pages...`)
+            
+            // Teste 1: Verificar se todas as LPs têm IDs únicos
+            const ids = lps.map(lp => lp.id)
+            const uniqueIds = [...new Set(ids)]
+            
+            if (ids.length !== uniqueIds.length) {
+                log("❌ PROBLEMA ENCONTRADO: IDs duplicados!", 'error')
+                const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index)
+                log(`IDs duplicados: ${duplicates.join(', ')}`, 'error')
+                addTestResult("Verificação de IDs únicos", false, "IDs duplicados detectados")
+            } else {
+                log("✅ IDs únicos verificados", 'success')
+                addTestResult("Verificação de IDs únicos", true, "Todos os IDs são únicos")
+            }
+            
+            // Teste 2: Simular busca individual por ID
+            lps.forEach((lp, index) => {
+                log(`--- Testando LP ${index + 1}: ${lp.titulo} ---`)
+                
+                // Simular o processo de busca do LandingPagePreview
+                const targetId = String(lp.id)
+                log(`ID alvo: ${targetId}`)
+                
+                // Busca direta no localStorage (como no componente)
+                const rawData = localStorage.getItem('plp:lps')
+                if (!rawData) {
+                    log(`❌ ERRO: Nenhum dado encontrado no localStorage`, 'error')
+                    addTestResult(`LP ${index + 1} - Busca por ID`, false, "Nenhum dado no localStorage")
+                    return
+                }
+                
+                const allLps = JSON.parse(rawData)
+                log(`Total de LPs no storage: ${allLps.length}`)
+                
+                // Busca pela LP específica
+                const foundLp = allLps.find(x => String(x.id) === String(targetId))
+                
+                if (!foundLp) {
+                    log(`❌ ERRO: LP não encontrada para ID ${targetId}`, 'error')
+                    log(`IDs disponíveis: ${allLps.map(l => l.id).join(', ')}`, 'error')
+                    addTestResult(`LP ${index + 1} - Busca por ID`, false, "LP não encontrada")
+                } else {
+                    log(`✅ LP encontrada: ${foundLp.titulo}`, 'success')
+                    log(`Template: ${foundLp.id_template}, Cliente: ${foundLp.id_cliente}`)
+                    
+                    // Verificar se é a LP correta
+                    if (foundLp.id === lp.id && foundLp.titulo === lp.titulo) {
+                        log(`✅ LP correta encontrada`, 'success')
+                        addTestResult(`LP ${index + 1} - Busca por ID`, true, "LP correta encontrada")
+                    } else {
+                        log(`❌ LP INCORRETA encontrada!`, 'error')
+                        log(`Esperado: ${lp.titulo}, Encontrado: ${foundLp.titulo}`, 'error')
+                        addTestResult(`LP ${index + 1} - Busca por ID`, false, "LP incorreta encontrada")
+                    }
+                }
+            })
+            
+            log("=== SIMULAÇÃO CONCLUÍDA ===")
+        }
+        
+        function addTestResult(testName, passed, message) {
+            const resultsDiv = document.getElementById('test-results')
+            const resultDiv = document.createElement('div')
+            resultDiv.className = `test-result ${passed ? 'test-pass' : 'test-fail'}`
+            resultDiv.innerHTML = `
+                <strong>${testName}:</strong> ${passed ? '✅ PASSOU' : '❌ FALHOU'}<br>
+                <small>${message}</small>
+            `
+            resultsDiv.appendChild(resultDiv)
+        }
+        
+        function displayTestResults() {
+            const resultsDiv = document.getElementById('test-results')
+            const lps = load("lps", [])
+            const clientes = load("clientes", [])
+            
+            if (lps.length === 0) {
+                resultsDiv.innerHTML = '<p>Nenhuma landing page encontrada.</p>'
+                return
+            }
+            
+            let html = '<h4>Dados Atuais:</h4>'
+            html += `<p><strong>Clientes:</strong> ${clientes.length}</p>`
+            html += `<p><strong>Landing Pages:</strong> ${lps.length}</p>`
+            
+            lps.forEach((lp, index) => {
+                const cliente = clientes.find(c => c.id === lp.id_cliente)
+                html += `
+                    <div style="border: 1px solid #ddd; padding: 10px; margin: 5px 0; border-radius: 3px;">
+                        <strong>LP ${index + 1}:</strong> ${lp.titulo}<br>
+                        <strong>ID:</strong> ${lp.id}<br>
+                        <strong>Template:</strong> ${lp.id_template}<br>
+                        <strong>Cliente:</strong> ${cliente ? cliente.nome : 'N/A'}
+                    </div>
+                `
+            })
+            
+            resultsDiv.innerHTML = html
+        }
+        
+        // Exibir dados iniciais
+        displayTestResults()
+        log("Simulação iniciada. Crie dados de teste e execute a simulação para identificar o problema.")
+    </script>
+</body>
+</html>

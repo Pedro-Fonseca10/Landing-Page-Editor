@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de React Effect - PerfectLandingPage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; margin: 5px 0; font-family: monospace; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .state-display { background: #e9ecef; padding: 10px; border-radius: 3px; font-family: monospace; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de React Effect - PerfectLandingPage</h1>
+        
+        <div class="section">
+            <h3>Simulação de useEffect</h3>
+            <p>Este teste simula exatamente como o useEffect está funcionando no LandingPagePreview:</p>
+            
+            <div class="state-display" id="current-state">
+                <strong>Estado Atual:</strong><br>
+                ID: <span id="current-id">-</span><br>
+                LP: <span id="current-lp">-</span><br>
+                Loading: <span id="current-loading">false</span><br>
+                Error: <span id="current-error">-</span>
+            </div>
+            
+            <div style="margin: 10px 0;">
+                <button class="btn btn-primary" onclick="simulateEffect('lp1')">Simular useEffect para lp1</button>
+                <button class="btn btn-primary" onclick="simulateEffect('lp2')">Simular useEffect para lp2</button>
+                <button class="btn btn-primary" onclick="simulateEffect('lp3')">Simular useEffect para lp3</button>
+            </div>
+            
+            <button class="btn btn-success" onclick="createTestData()">Criar Dados de Teste</button>
+            <button class="btn btn-danger" onclick="clearData()">Limpar Dados</button>
+        </div>
+        
+        <div class="section">
+            <h3>Logs do useEffect</h3>
+            <div id="effect-logs"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Logs Gerais</h3>
+            <div id="general-logs"></div>
+        </div>
+    </div>
+
+    <script>
+        const k = (name) => `plp:${name}`
+        
+        // Estado simulado do React
+        let currentState = {
+            id: null,
+            lp: null,
+            loading: false,
+            error: null
+        }
+        
+        // Refs simuladas
+        let currentIdRef = null
+        let searchAttemptsRef = 0
+        
+        function log(message, type = 'info', target = 'general') {
+            const logsDiv = document.getElementById(`${target}-logs`)
+            const logEntry = document.createElement('div')
+            logEntry.className = `log ${type}`
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
+        }
+        
+        function updateStateDisplay() {
+            document.getElementById('current-id').textContent = currentState.id || '-'
+            document.getElementById('current-lp').textContent = currentState.lp ? `${currentState.lp.titulo} (${currentState.lp.id})` : '-'
+            document.getElementById('current-loading').textContent = currentState.loading.toString()
+            document.getElementById('current-error').textContent = currentState.error || '-'
+        }
+        
+        function load(name, fallback = []) {
+            try {
+                const data = localStorage.getItem(k(name))
+                const parsed = JSON.parse(data ?? "null") ?? fallback
+                return parsed
+            } catch (error) {
+                log(`Erro ao carregar ${name}: ${error.message}`, 'error')
+                return fallback
+            }
+        }
+        
+        function save(name, data) {
+            localStorage.setItem(k(name), JSON.stringify(data))
+        }
+        
+        // Simulação da função findLandingPage
+        function findLandingPage(targetId) {
+            // Verificar se já estamos buscando este ID
+            if (currentIdRef === targetId) {
+                log(`Já buscando ID: ${targetId}, ignorando busca duplicada`, 'warning', 'effect')
+                return null
+            }
+            
+            currentIdRef = targetId
+            searchAttemptsRef++
+            
+            log(`=== BUSCA #${searchAttemptsRef} PARA ID: ${targetId} ===`, 'info', 'effect')
+            
+            try {
+                // Busca direta no localStorage
+                const rawData = localStorage.getItem('plp:lps')
+                log(`Raw localStorage data length: ${rawData ? rawData.length : 0}`, 'info', 'effect')
+                
+                if (!rawData) {
+                    log("Nenhum dado encontrado no localStorage", 'error', 'effect')
+                    return { error: "Nenhuma landing page encontrada no sistema" }
+                }
+                
+                const allLps = JSON.parse(rawData)
+                log(`Total de LPs no storage: ${allLps.length}`, 'info', 'effect')
+                log(`IDs disponíveis: ${allLps.map(lp => lp.id).join(', ')}`, 'info', 'effect')
+                
+                // Busca pela landing page específica
+                const foundLp = allLps.find(x => String(x.id) === String(targetId))
+                
+                if (!foundLp) {
+                    log(`Landing page não encontrada para ID: ${targetId}`, 'error', 'effect')
+                    log(`IDs disponíveis: ${allLps.map(lp => lp.id).join(', ')}`, 'error', 'effect')
+                    return { 
+                        error: `Landing page não encontrada para ID: ${targetId}`,
+                        availableIds: allLps.map(lp => lp.id)
+                    }
+                }
+                
+                log(`Landing page encontrada: ${foundLp.titulo}`, 'success', 'effect')
+                
+                // Validação rigorosa do ID
+                if (String(foundLp.id) !== String(targetId)) {
+                    log("ERRO CRÍTICO: ID não corresponde!", 'error', 'effect')
+                    return { 
+                        error: "Erro de correspondência de ID",
+                        details: {
+                            expected: targetId,
+                            found: foundLp.id
+                        }
+                    }
+                }
+                
+                return { lp: foundLp }
+                
+            } catch (error) {
+                log(`Erro ao carregar dados: ${error.message}`, 'error', 'effect')
+                return { error: `Erro ao carregar dados: ${error.message}` }
+            }
+        }
+        
+        // Simulação do useEffect
+        function simulateEffect(targetId) {
+            log(`=== SIMULANDO USEEFFECT PARA ID: ${targetId} ===`, 'info', 'effect')
+            
+            // Reset completo do estado (como no useEffect)
+            currentState.lp = null
+            currentState.error = null
+            currentState.loading = true
+            currentState.id = targetId
+            
+            updateStateDisplay()
+            
+            log("Estado resetado", 'info', 'effect')
+            
+            // Pequeno delay para simular o setTimeout do useEffect
+            setTimeout(() => {
+                // Busca a landing page
+                const result = findLandingPage(targetId)
+                
+                if (result && result.error) {
+                    log(`Erro na busca: ${result.error}`, 'error', 'effect')
+                    if (result.availableIds) {
+                        log(`IDs disponíveis: ${result.availableIds.join(', ')}`, 'error', 'effect')
+                    }
+                    currentState.error = result.error
+                } else if (result && result.lp) {
+                    log(`Landing page encontrada e definida no estado: ${result.lp.titulo}`, 'success', 'effect')
+                    currentState.lp = result.lp
+                } else {
+                    log("Resultado inesperado da busca", 'error', 'effect')
+                    currentState.error = "Erro inesperado na busca"
+                }
+                
+                currentState.loading = false
+                updateStateDisplay()
+                
+                log("Estado atualizado", 'info', 'effect')
+                
+            }, 100)
+        }
+        
+        function createTestData() {
+            log("=== CRIANDO DADOS DE TESTE ===", 'info', 'general')
+            
+            // Limpar dados existentes
+            localStorage.removeItem(k("lps"))
+            
+            // Criar landing pages com IDs únicos
+            const lps = [
+                { id: "lp1", titulo: "LP SaaS - Cliente A", id_cliente: "cliente1", id_template: "saas" },
+                { id: "lp2", titulo: "LP Evento - Cliente B", id_cliente: "cliente2", id_template: "evento" },
+                { id: "lp3", titulo: "LP D2C - Cliente C", id_cliente: "cliente3", id_template: "d2c" }
+            ]
+            
+            save("lps", lps)
+            
+            log("✅ 3 Landing Pages de teste criadas com sucesso!", 'success', 'general')
+            lps.forEach((lp, index) => {
+                log(`LP ${index + 1}: ID="${lp.id}", Título="${lp.titulo}", Template="${lp.id_template}"`, 'info', 'general')
+            })
+        }
+        
+        function clearData() {
+            log("Limpando dados...", 'info', 'general')
+            localStorage.removeItem(k("lps"))
+            log("✅ Dados limpos!", 'success', 'general')
+            
+            // Resetar estado
+            currentState = {
+                id: null,
+                lp: null,
+                loading: false,
+                error: null
+            }
+            updateStateDisplay()
+        }
+        
+        // Exibir estado inicial
+        updateStateDisplay()
+        log("Teste de React Effect iniciado. Crie dados de teste e simule o useEffect para identificar o problema.", 'info', 'general')
+    </script>
+</body>
+</html>

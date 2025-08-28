@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../features/auth/useAuth"
 
@@ -8,7 +8,13 @@ export default function Login() {
   const [password, setPassword] = useState("")
   const [err, setErr] = useState("")
   const nav = useNavigate()
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
+
+  // Ao montar, sempre faz logout para forçar autenticação
+  useEffect(() => {
+    logout()
+    // eslint-disable-next-line
+  }, [])
 
   const onSubmit = (e) => {
     e.preventDefault()

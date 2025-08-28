@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Router - PerfectLandingPage</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { padding: 10px 15px; margin: 5px; border: none; border-radius: 3px; cursor: pointer; }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .log { background: #f8f9fa; padding: 10px; border-radius: 3px; margin: 5px 0; font-family: monospace; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+        .warning { color: #ffc107; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 3px; }
+        .test-pass { background: #d4edda; border: 1px solid #c3e6cb; }
+        .test-fail { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .url-display { background: #e9ecef; padding: 10px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Router - PerfectLandingPage</h1>
+        
+        <div class="section">
+            <h3>Simulação de URLs</h3>
+            <p>Este teste simula exatamente como o React Router está funcionando:</p>
+            <div class="url-display" id="current-url">URL atual: /</div>
+            
+            <div style="margin: 10px 0;">
+                <button class="btn btn-primary" onclick="simulateUrl('/preview/lp1')">Simular /preview/lp1</button>
+                <button class="btn btn-primary" onclick="simulateUrl('/preview/lp2')">Simular /preview/lp2</button>
+                <button class="btn btn-primary" onclick="simulateUrl('/preview/lp3')">Simular /preview/lp3</button>
+            </div>
+            
+            <button class="btn btn-success" onclick="createTestData()">Criar Dados de Teste</button>
+            <button class="btn btn-danger" onclick="clearData()">Limpar Dados</button>
+        </div>
+        
+        <div class="section">
+            <h3>Teste de Busca por ID</h3>
+            <div id="search-results"></div>
+        </div>
+        
+        <div class="section">
+            <h3>Logs Detalhados</h3>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        const k = (name) => `plp:${name}`
+        let currentUrl = '/'
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs')
+            const logEntry = document.createElement('div')
+            logEntry.className = `log ${type}`
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`
+            logsDiv.appendChild(logEntry)
+            logsDiv.scrollTop = logsDiv.scrollHeight
+        }
+        
+        function uid() {
+            const timestamp = Date.now().toString(36)
+            const random = Math.random().toString(36).slice(2, 10)
+            return `${timestamp}-${random}`
+        }
+        
+        function load(name, fallback = []) {
+            try {
+                const data = localStorage.getItem(k(name))
+                const parsed = JSON.parse(data ?? "null") ?? fallback
+                return parsed
+            } catch (error) {
+                log(`Erro ao carregar ${name}: ${error.message}`, 'error')
+                return fallback
+            }
+        }
+        
+        function save(name, data) {
+            localStorage.setItem(k(name), JSON.stringify(data))
+        }
+        
+        function simulateUrl(url) {
+            currentUrl = url
+            document.getElementById('current-url').textContent = `URL atual: ${url}`
+            
+            log(`=== SIMULANDO NAVEGAÇÃO PARA: ${url} ===`)
+            
+            // Extrair o ID da URL (como o useParams faria)
+            const match = url.match(/\/preview\/(.+)/)
+            if (match) {
+                const id = match[1]
+                log(`ID extraído da URL: ${id}`)
+                
+                // Simular o processo do LandingPagePreview
+                testLandingPageSearch(id)
+            } else {
+                log(`❌ URL não corresponde ao padrão /preview/:id`, 'error')
+            }
+        }
+        
+        function testLandingPageSearch(targetId) {
+            log(`--- TESTANDO BUSCA PARA ID: ${targetId} ---`)
+            
+            // Busca direta no localStorage (como no componente)
+            const rawData = localStorage.getItem('plp:lps')
+            if (!rawData) {
+                log(`❌ ERRO: Nenhum dado encontrado no localStorage`, 'error')
+                return
+            }
+            
+            const allLps = JSON.parse(rawData)
+            log(`Total de LPs no storage: ${allLps.length}`)
+            log(`IDs disponíveis: ${allLps.map(lp => lp.id).join(', ')}`)
+            
+            // Busca pela LP específica
+            const foundLp = allLps.find(x => String(x.id) === String(targetId))
+            
+            if (!foundLp) {
+                log(`❌ ERRO: LP não encontrada para ID ${targetId}`, 'error')
+                log(`IDs disponíveis: ${allLps.map(l => l.id).join(', ')}`, 'error')
+                
+                // Verificar se há algum problema de tipo
+                allLps.forEach((lp, index) => {
+                    log(`LP ${index + 1}: ID="${lp.id}" (tipo: ${typeof lp.id}), Comparação: "${lp.id}" === "${targetId}" = ${String(lp.id) === String(targetId)}`)
+                })
+            } else {
+                log(`✅ LP encontrada: ${foundLp.titulo}`, 'success')
+                log(`Template: ${foundLp.id_template}, Cliente: ${foundLp.id_cliente}`)
+                
+                // Verificar se é a LP correta
+                if (foundLp.id === targetId) {
+                    log(`✅ ID corresponde exatamente`, 'success')
+                } else {
+                    log(`⚠️ ID não corresponde exatamente: esperado="${targetId}", encontrado="${foundLp.id}"`, 'warning')
+                }
+            }
+            
+            displaySearchResults(targetId, foundLp, allLps)
+        }
+        
+        function displaySearchResults(targetId, foundLp, allLps) {
+            const resultsDiv = document.getElementById('search-results')
+            
+            let html = `<h4>Resultado da Busca para ID: ${targetId}</h4>`
+            
+            if (foundLp) {
+                html += `
+                    <div class="test-result test-pass">
+                        <strong>✅ Landing Page Encontrada:</strong><br>
+                        <strong>Título:</strong> ${foundLp.titulo}<br>
+                        <strong>ID:</strong> ${foundLp.id}<br>
+                        <strong>Template:</strong> ${foundLp.id_template}<br>
+                        <strong>Cliente:</strong> ${foundLp.id_cliente}
+                    </div>
+                `
+            } else {
+                html += `
+                    <div class="test-result test-fail">
+                        <strong>❌ Landing Page NÃO Encontrada</strong><br>
+                        <strong>ID solicitado:</strong> ${targetId}
+                    </div>
+                `
+            }
+            
+            html += `<h5>Todas as Landing Pages no Sistema:</h5>`
+            allLps.forEach((lp, index) => {
+                const isTarget = String(lp.id) === String(targetId)
+                const status = isTarget ? '🎯 ALVO' : '📄'
+                html += `
+                    <div class="test-result ${isTarget ? 'test-pass' : ''}" style="margin: 5px 0; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                        ${status} <strong>LP ${index + 1}:</strong> ${lp.titulo}<br>
+                        <strong>ID:</strong> ${lp.id} (tipo: ${typeof lp.id})<br>
+                        <strong>Template:</strong> ${lp.id_template}<br>
+                        <strong>Cliente:</strong> ${lp.id_cliente}
+                    </div>
+                `
+            })
+            
+            resultsDiv.innerHTML = html
+        }
+        
+        function createTestData() {
+            log("=== CRIANDO DADOS DE TESTE ===")
+            
+            // Limpar dados existentes
+            localStorage.removeItem(k("lps"))
+            
+            // Criar landing pages com IDs únicos e diferentes
+            const lps = [
+                { id: "lp1", titulo: "LP SaaS - Cliente A", id_cliente: "cliente1", id_template: "saas" },
+                { id: "lp2", titulo: "LP Evento - Cliente B", id_cliente: "cliente2", id_template: "evento" },
+                { id: "lp3", titulo: "LP D2C - Cliente C", id_cliente: "cliente3", id_template: "d2c" }
+            ]
+            
+            save("lps", lps)
+            
+            log("✅ 3 Landing Pages de teste criadas com sucesso!", 'success')
+            lps.forEach((lp, index) => {
+                log(`LP ${index + 1}: ID="${lp.id}", Título="${lp.titulo}", Template="${lp.id_template}"`)
+            })
+            
+            // Verificar se foram salvas corretamente
+            const savedLps = load("lps", [])
+            log(`Verificação: ${savedLps.length} LPs carregadas do storage`)
+            
+            // Testar busca individual
+            savedLps.forEach((lp, index) => {
+                const found = savedLps.find(x => String(x.id) === String(lp.id))
+                if (found) {
+                    log(`✅ LP ${index + 1} encontrada corretamente: ${found.titulo}`)
+                } else {
+                    log(`❌ LP ${index + 1} NÃO encontrada!`, 'error')
+                }
+            })
+        }
+        
+        function clearData() {
+            log("Limpando dados...")
+            localStorage.removeItem(k("lps"))
+            log("✅ Dados limpos!", 'success')
+            document.getElementById('search-results').innerHTML = ''
+        }
+        
+        // Exibir dados iniciais
+        log("Teste de Router iniciado. Crie dados de teste e simule navegação para identificar o problema.")
+    </script>
+</body>
+</html>

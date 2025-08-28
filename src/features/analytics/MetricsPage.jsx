@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { loadEventsInRange, computeMetrics } from "./metrics"
 import { exportCSV, exportMetricsPDF } from "./export"
 
 function pct(x) { return (x * 100).toFixed(1) + "%" }
 
 export default function MetricsPage() {
+  const navigate = useNavigate()
   const [start, setStart] = useState("")
   const [end, setEnd] = useState("")
 
@@ -53,7 +55,10 @@ export default function MetricsPage() {
 
   return (
     <div className="p-6 grid gap-6">
-      <h1 className="text-2xl">Métricas</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl">Métricas</h1>
+        <button className="border rounded px-3 py-1" onClick={() => navigate(-1)} type="button">Voltar</button>
+      </div>
 
       <div className="flex flex-wrap gap-3 items-end">
         <label className="grid gap-1">

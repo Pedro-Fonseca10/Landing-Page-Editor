@@ -1,25 +1,48 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { load, save } from "../../lib/storage"
 import { uid } from "../../lib/uid"
 
 export default function ClientsPage() {
+  const navigate = useNavigate()
   const [list, setList] = useState([])
   const [form, setForm] = useState({ id: null, nome: "", setor: "" })
+  const [error, setError] = useState(null)
 
   useEffect(() => setList(load("clientes", [])), [])
-  const persist = (next) => { setList(next); save("clientes", next) }
+  
+  const persist = (next) => { 
+    setList(next)
+    save("clientes", next)
+  }
 
   const onSubmit = (e) => {
     e.preventDefault()
-    if (!form.nome.trim()) return
-    if (form.id) {
-      persist(list.map(c => c.id === form.id ? { ...c, ...form } : c))
-    } else {
-      persist([{ id: uid(), nome: form.nome, setor: form.setor }, ...list])
+    setError(null)
+    
+    if (!form.nome.trim()) {
+      setError("Por favor, insira um nome para o cliente")
+      return
     }
+    
+    if (form.id) {
+      // Editando cliente existente
+      const updatedList = list.map(c => c.id === form.id ? { ...c, ...form } : c)
+      persist(updatedList)
+    } else {
+      // Criando novo cliente
+      const newId = uid()
+      const novoCliente = { id: newId, nome: form.nome, setor: form.setor }
+      persist([novoCliente, ...list])
+    }
+    
     setForm({ id: null, nome: "", setor: "" })
   }
-  const edit = (c) => setForm(c)
+  
+  const edit = (c) => {
+    setForm(c)
+  }
+  
   const del = (id) => {
     const next = list.filter(c => c.id !== id)
     persist(next)
@@ -27,7 +50,17 @@ export default function ClientsPage() {
 
   return (
     <div className="p-6 grid gap-6">
-      <h1 className="text-2xl">Clientes</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-2xl">Clientes</h1>
+        <button className="border rounded px-3 py-1" onClick={() => navigate(-1)} type="button">Voltar</button>
+      </div>
+      
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error}
+        </div>
+      )}
+      
       <form onSubmit={onSubmit} className="grid gap-3 max-w-lg">
         <input className="border p-2 rounded" placeholder="Nome" value={form.nome}
                onChange={(e)=>setForm({...form, nome:e.target.value})}/>
@@ -47,33 +80,7 @@ export default function ClientsPage() {
             <div>
               <div className="font-medium">{c.nome}</div>
               {c.setor && <div className="text-sm text-gray-600">{c.setor}</div>}
-              {/* Aqui você pode listar as landingpages do cliente, se existirem */}
-              {Array.isArray(c.landingpages) && c.landingpages.length > 0 && (
-                <div className="mt-2">
-                  <div className="text-xs font-semibold mb-1">Landing Pages:</div>
-                  <ul className="list-disc ml-5">
-                    {c.landingpages.map(lp => (
-                      <li key={lp.id} className="flex items-center justify-between">
-                        <span>{lp.nome}</span>
-                        <button
-                          className="ml-2 border rounded px-2 py-1 text-xs"
-                          onClick={() => {
-                            // Remove apenas a landingpage selecionada deste cliente
-                            const nextList = list.map(client =>
-                              client.id === c.id
-                                ? { ...client, landingpages: client.landingpages.filter(l => l.id !== lp.id) }
-                                : client
-                            );
-                            persist(nextList);
-                          }}
-                        >
-                          Remover Landingpage
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              <div className="text-xs text-gray-500">ID: {c.id}</div>
             </div>
             <div className="flex gap-2">
               <button className="border rounded px-3 py-1" onClick={()=>edit(c)}>Editar</button>
