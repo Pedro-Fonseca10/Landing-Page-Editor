@@ -5,7 +5,7 @@ const AuthCtx = createContext(null)
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const login = (email, password) => {
-    if (email === "admin" && password === "123") setUser({ email, role: "admin" })
+    if (email === "Pedro" && password === "123") setUser({ email, role: "admin" })
     else if (email === "membro" && password === "123") setUser({ email, role: "member" })
     else throw new Error("Credenciais inválidas")
   }
