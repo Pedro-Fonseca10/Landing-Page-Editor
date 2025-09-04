@@ -23,57 +23,34 @@ export default function LandingPagePreview() {
   const findLandingPage = useCallback((targetId) => {
     // Verificar se já estamos buscando este ID
     if (currentIdRef.current === targetId) {
-      console.log(`Já buscando ID: ${targetId}, ignorando busca duplicada`)
       return null
     }
     
     currentIdRef.current = targetId
     searchAttemptsRef.current++
     
-    console.log(`=== BUSCA #${searchAttemptsRef.current} PARA ID: ${targetId} ===`)
-    console.log(`Componente montado: ${componentMountedRef.current}`)
-    
     try {
       // Busca direta no localStorage para evitar cache
       const rawData = localStorage.getItem('plp:lps')
-      console.log("Raw localStorage data length:", rawData ? rawData.length : 0)
       
       if (!rawData) {
-        console.error("Nenhum dado encontrado no localStorage")
         return { error: "Nenhuma landing page encontrada no sistema" }
       }
       
       const allLps = JSON.parse(rawData)
-      console.log(`Total de LPs no storage: ${allLps.length}`)
-      console.log("IDs disponíveis:", allLps.map(lp => lp.id))
       
       // Busca pela landing page específica
       const foundLp = allLps.find(x => String(x.id) === String(targetId))
       
       if (!foundLp) {
-        console.error(`Landing page não encontrada para ID: ${targetId}`)
-        console.error("IDs disponíveis:", allLps.map(lp => lp.id))
         return { 
           error: `Landing page não encontrada para ID: ${targetId}`,
           availableIds: allLps.map(lp => lp.id)
         }
       }
       
-      console.log("Landing page encontrada:", {
-        id: foundLp.id,
-        titulo: foundLp.titulo,
-        template: foundLp.id_template,
-        cliente: foundLp.id_cliente
-      })
-      
       // Validação rigorosa do ID
       if (String(foundLp.id) !== String(targetId)) {
-        console.error("ERRO CRÍTICO: ID não corresponde!", {
-          expected: targetId,
-          found: foundLp.id,
-          expectedType: typeof targetId,
-          foundType: typeof foundLp.id
-        })
         return { 
           error: "Erro de correspondência de ID",
           details: {
@@ -88,7 +65,6 @@ export default function LandingPagePreview() {
       return { lp: foundLp }
       
     } catch (error) {
-      console.error("Erro ao carregar dados:", error)
       return { error: `Erro ao carregar dados: ${error.message}` }
     }
   }, [])
@@ -96,20 +72,12 @@ export default function LandingPagePreview() {
   // Efeito de montagem do componente
   useEffect(() => {
     componentMountedRef.current = true
-    console.log(`=== COMPONENTE MONTADO - KEY: ${componentKey} ===`)
-    
-    return () => {
-      componentMountedRef.current = false
-      console.log(`=== COMPONENTE DESMONTADO - KEY: ${componentKey} ===`)
-    }
+    return () => { componentMountedRef.current = false }
   }, [componentKey])
 
   // Efeito principal para buscar a landing page
   useEffect(() => {
-    if (!componentMountedRef.current) {
-      console.log("Componente ainda não montado, aguardando...")
-      return
-    }
+    if (!componentMountedRef.current) { return }
     
     const targetId = String(id)
     console.log(`=== PREVIEW EFFECT TRIGGERED ===`)
@@ -126,32 +94,16 @@ export default function LandingPagePreview() {
     // Pequeno delay para garantir que o estado anterior foi limpo
     const timer = setTimeout(() => {
       // Verificar se o componente ainda está montado
-      if (!componentMountedRef.current) {
-        console.log("Componente foi desmontado durante a busca, cancelando...")
-        return
-      }
+      if (!componentMountedRef.current) { return }
       
       // Busca a landing page
       const result = findLandingPage(targetId)
       
       if (result && result.error) {
-        console.error("Erro na busca:", result.error)
-        if (result.availableIds) {
-          console.error("IDs disponíveis:", result.availableIds)
-        }
-        if (result.details) {
-          console.error("Detalhes do erro:", result.details)
-        }
         setError(result.error)
       } else if (result && result.lp) {
-        console.log("Landing page encontrada e definida no estado:", {
-          id: result.lp.id,
-          titulo: result.lp.titulo,
-          template: result.lp.id_template
-        })
         setLp(result.lp)
       } else {
-        console.error("Resultado inesperado da busca:", result)
         setError("Erro inesperado na busca")
       }
       
@@ -164,16 +116,11 @@ export default function LandingPagePreview() {
     }
   }, [id, findLandingPage, componentKey, state?.lpId])
 
-  // Log do estado atual para debug
-  useEffect(() => {
-    console.log("Estado atual:", { lp: lp?.id, error, loading, componentKey })
-  }, [lp, error, loading, componentKey])
+  // (removido) logs de debug do estado
 
   // Verificação de segurança: se o ID mudou mas a LP não corresponde, redirecionar
   useEffect(() => {
     if (lp && String(lp.id) !== String(id)) {
-      console.error("INCONSISTÊNCIA DETECTADA: ID da URL não corresponde ao ID da LP!")
-      console.error("Redirecionando para a LP correta...")
       navigate(`/preview/${lp.id}`, { replace: true })
     }
   }, [lp, id, navigate])
