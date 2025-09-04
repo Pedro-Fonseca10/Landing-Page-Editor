@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { logEvent } from "../analytics/analytics"
 
-export default function LeadForm({ lpId, formId = "lead" }) {
+export default function LeadForm({ lpId, formId = "lead", btnStyle = {} }) {
   const [sent, setSent] = useState(false)
   const started = useRef(false)
 
@@ -29,7 +29,7 @@ export default function LeadForm({ lpId, formId = "lead" }) {
     <form className="grid gap-3 max-w-md" onSubmit={onSubmit}>
       <input name="nome" className="border p-2 rounded" placeholder="Seu nome" onFocus={onFocusFirst} />
       <input name="email" className="border p-2 rounded" placeholder="Seu e-mail" type="email" />
-      <button className="border rounded px-3 py-2">Enviar</button>
+      <button className="border rounded px-3 py-2" style={btnStyle}>Enviar</button>
     </form>
   )
 }

@@ -4,7 +4,7 @@
 const data = {
   theme: "#0ea5e9",
   navbar: {
-    logo: "PerfectLanding",
+    logo: "Nome do SaaS",
     links: [
       { label: "Recursos", href: "#features" },
       { label: "Planos", href: "#pricing" },
@@ -13,9 +13,9 @@ const data = {
     cta: { label: "Começar agora", href: "#cta" }
   },
   hero: {
-    title: "Acelere sua presença digital",
-    subtitle: "Crie landing pages modernas, mensuráveis e com alta conversão.",
-    img: "",
+    title: "Título Chamativo para seu SaaS",
+    subtitle: "Descrição rápida do que o SaaS faz e quais problemas resolve.",
+    img: "",  // Basta colocar a imagem na pasta public
     ctaText: "Quero testar",
     ctaHref: "#cta"
   },

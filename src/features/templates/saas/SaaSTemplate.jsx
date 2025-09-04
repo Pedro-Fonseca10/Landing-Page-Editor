@@ -1,11 +1,43 @@
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState, useEffect, useRef } from "react"
 import dataDefault from "./data"
 import LeadForm from "../../lps/LeadForm"
 import { logEvent } from "../../analytics/analytics"
 
+
 /* utilitários de layout */
 function Section({ id, children }) {
-  return <section id={id} className="py-12">{children}</section>
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setVisible(true)
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { root: null, rootMargin: "0px 0px -10% 0px", threshold: 0.1 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const cls = `py-12 transition-all duration-700 ease-out ${
+    visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+  } motion-reduce:transition-none motion-reduce:transform-none`
+
+  return (
+    <section id={id} ref={ref} className={cls}>
+      {children}
+    </section>
+  )
 }
 function Container({ children }) {
   return <div className="mx-auto max-w-5xl px-4">{children}</div>
@@ -311,9 +343,10 @@ function Footer({ data = {} }) {
 
 /* ---- TEMPLATE PRINCIPAL ---- */
 export default function SaaSTemplate({ lp }) {
-  const safeLP = lp || {}
-  const base = dataDefault || {}
-
+  const safeLP = useMemo(() => lp || {}, [lp])
+  // 'dataDefault' é um import estático; não precisa de useMemo
+  const base = dataDefault
+  
   // Merge: usa conteúdo da LP quando existir; senão, cai no default
   const content = useMemo(() => {
     const c = safeLP.content || {}
@@ -328,6 +361,7 @@ export default function SaaSTemplate({ lp }) {
       screenshots: c.screenshots ?? base.screenshots ?? [],
       testimonials: c.testimonials ?? base.testimonials ?? [],
       faq: c.faq ?? base.faq ?? [],
+      leadForm: { ...(base.leadForm || {}), ...(c.leadForm || {}) },
       footer: { ...(base.footer || {}), ...(c.footer || {}) },
     }
   }, [safeLP, base])
@@ -362,14 +396,22 @@ export default function SaaSTemplate({ lp }) {
       <Logos items={content.logos} />
       <Features data={content.features} />
       <HowItWorks steps={content.steps} />
-      <Screenshots shots={content.screenshots} />
+      {Array.isArray(content.screenshots) && content.screenshots.length > 0 && (
+        <Screenshots shots={content.screenshots} />
+      )}
       <Pricing theme={content.theme} data={content.pricing} lp={safeLP} />
 
       {/* CTA/Lead form (opcional) */}
       {safeLP?.id && (
         <Section id="cta">
           <Container>
-            <LeadForm lpId={safeLP.id} />
+            {(() => {
+              const useWhite = !!content?.leadForm?.textWhite
+              const btnStyle = useWhite
+                ? { background: content.theme, color: "#ffffff", borderColor: content.theme }
+                : {}
+              return <LeadForm lpId={safeLP.id} btnStyle={btnStyle} />
+            })()}
           </Container>
         </Section>
       )}
@@ -380,4 +422,3 @@ export default function SaaSTemplate({ lp }) {
     </div>
   )
 }
-
