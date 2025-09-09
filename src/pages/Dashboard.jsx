@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { useEffect, useState } from "react"
+import AppFooter from "../components/AppFooter"
 import { useAuth } from "../features/auth/useAuth"
 import { Repo } from "../lib/repo"
 
@@ -156,6 +157,7 @@ export default function Dashboard() {
           </Link>
         </section>
       </div>
+      <AppFooter />
     </div>
   )
 }

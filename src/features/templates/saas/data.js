@@ -38,7 +38,7 @@ const data = {
     { q: "Vocês coletam dados sensíveis?", a: "Não. A conversão é uma intenção/lead; o pagamento é externo." }
   ],
   footer: {
-    note: "© " + new Date().getFullYear() + " PerfectLanding. Todos os direitos reservados."
+    note: "© " + new Date().getFullYear() + " Landing Page Editor. Todos os direitos reservados a Pedro Henrique Diógenes da Fonseca 59.181.375/0001-48."
   }
 }
 

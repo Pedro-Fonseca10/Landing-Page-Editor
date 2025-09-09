@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import AppFooter from "../../components/AppFooter"
 import { load, save } from "../../lib/storage"
 import { uid } from "../../lib/uid"
 
@@ -172,6 +173,7 @@ export default function ClientsPage() {
           </section>
         </div>
       </div>
+      <AppFooter />
     </div>
   )
 }

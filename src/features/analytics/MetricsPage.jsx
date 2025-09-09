@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { loadEventsInRange, computeMetrics } from "./metrics"
 import { exportCSV, exportMetricsPDF } from "./export"
 import { Repo } from "../../lib/repo"
+import AppFooter from "../../components/AppFooter"
 
 function pct(x) { return (x * 100).toFixed(1) + "%" }
 const fmt = (d) => {
@@ -216,6 +217,7 @@ export default function MetricsPage() {
           </div>
         </section>
       </div>
+      <AppFooter />
     </div>
   )
 }

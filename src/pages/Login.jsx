@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import AppFooter from "../components/AppFooter"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../features/auth/useAuth"
 
@@ -142,6 +143,7 @@ export default function Login() {
           </main>
         </div>
       </div>
+      <AppFooter />
     </div>
   )
 }

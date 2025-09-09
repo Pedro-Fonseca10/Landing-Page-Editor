@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { Repo } from "../../lib/repo"
 import { defaultContent } from "./defaultContent"
 import saasDefault from "../templates/saas/data"
+import AppFooter from "../../components/AppFooter"
 
 export default function LandingPageEditor() {
   const { id } = useParams()
@@ -653,6 +654,7 @@ export default function LandingPageEditor() {
           </div>
         </section>
       </div>
+      <AppFooter />
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
+import AppFooter from "../../components/AppFooter"
 import { Repo } from "../../lib/repo"
 import { TEMPLATES } from "../templates/catalog"
 import { exportLandingPageZip } from "./exporter"
@@ -248,6 +249,7 @@ export default function LandingPagesPage() {
           </section>
         </div>
       </div>
+      <AppFooter />
     </div>
   )
 }
