@@ -260,6 +260,22 @@ export default function LandingPageEditor() {
               </div>
             </section>
 
+            {/* Cabeçalho / Navbar */}
+            <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Cabeçalho</h2>
+              <div className="mt-4 grid gap-4">
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Nome do SaaS (logo/texto)</label>
+                  <input
+                    className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                    placeholder="Ex.: Minha Plataforma"
+                    value={getSaaSValue(["navbar","logo"], "")}
+                    onChange={(e)=>onChangePath(["navbar","logo"], e.target.value)}
+                  />
+                </div>
+              </div>
+            </section>
+
             {/* Hero */}
             <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
               <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Hero</h2>
