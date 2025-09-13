@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import dataDefault from "./data"
 import LeadForm from "../../lps/LeadForm"
 import { logEvent } from "../../analytics/analytics"
@@ -43,35 +44,110 @@ function Container({ children }) {
   return <div className="mx-auto max-w-5xl px-4">{children}</div>
 }
 
-/* alternância de tema */
-function ThemeToggle({ dark, setDark }) {
+/* seletor de cor principal */
+function ColorPicker({ color, onChange, label = "Cor", palette }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+  const PALETTE = [
+    "#0f172a", // Azul escuro padrão (slate-900)
+    "#000000", // Preto
+    "#ffffff", // Branco
+    "#f8fafc", // Cinza muito claro (slate-50)
+    "#e2e8f0", // Cinza claro (slate-200)
+    "#94a3b8", // Cinza médio (slate-400)
+    // cores adicionais caso queira variar
+    "#0ea5e9", // Sky 500
+    "#1d4ed8", // Blue 700
+    "#0f766e", // Teal 700
+    "#16a34a", // Green 600
+    "#ca8a04", // Yellow 600
+    "#ea580c", // Orange 600
+    "#dc2626", // Red 600
+    "#7c3aed", // Violet 600
+    "#9333ea", // Purple 600
+    "#db2777", // Pink 600
+  ]
+
+  function hexToRgb(hex) {
+    const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+    if (!m) return { r: 255, g: 255, b: 255 }
+    return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+  }
+  function isLight(hex) {
+    const { r, g, b } = hexToRgb(hex)
+    const luminance = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255)
+    return luminance > 0.85
+  }
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener("mousedown", onClickOutside)
+    return () => document.removeEventListener("mousedown", onClickOutside)
+  }, [])
+
   return (
-    <button
-      type="button"
-      onClick={() => setDark(v => !v)}
-      aria-label={dark ? "Ativar modo claro" : "Ativar modo escuro"}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
-    >
-      {dark ? (
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5.64 5.64L4.22 4.22M19.78 19.78l-1.42-1.42M18.36 5.64l1.42-1.42M4.22 19.78l1.42-1.42" />
-        </svg>
-      ) : (
-        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
-        </svg>
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Escolher cor do tema"
+        className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-200 px-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+      >
+        <span
+          aria-hidden
+          className="inline-block h-4 w-4 rounded-full border"
+          style={{ background: color, borderColor: isLight(color) ? "#cbd5e1" : color }}
+        />
+        {label}
+      </button>
+      {open && (
+        <div className="absolute right-0 z-[9999] mt-2 w-48 rounded-md border border-slate-200 bg-white p-2 shadow-md dark:border-slate-700 dark:bg-slate-900">
+          <div className="grid grid-cols-6 gap-2">
+            {(palette || PALETTE).map((c) => {
+              const light = isLight(c)
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => {
+                    onChange?.(c)
+                    setOpen(false)
+                  }}
+                  aria-label={`Usar cor ${c}`}
+                  className={`h-6 w-6 rounded-full ring-offset-2 focus:outline-none focus:ring-2 ${light ? "border border-slate-300" : ""}`}
+                  style={{ background: c, boxShadow: c === color ? `0 0 0 2px ${c}` : undefined }}
+                  title={c}
+                />
+              )
+            })}
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="color"
+              value={/^#[0-9a-fA-F]{6}$/.test(color || "") ? color : "#0f172a"}
+              onChange={(e) => {
+                onChange?.(e.target.value)
+                setOpen(false)
+              }}
+              className="h-6 w-10 cursor-pointer rounded border border-slate-300 bg-white p-0"
+              aria-label="Escolher uma cor personalizada"
+            />
+            <span className="text-xs text-slate-600 dark:text-slate-300">Escolher</span>
+          </div>
+        </div>
       )}
-    </button>
+    </div>
   )
 }
 
 /* navbar */
-function Navbar({ theme, data = {}, dark, setDark }) {
+function Navbar({ theme, data = {}, onPickBgColor, bgColor, onPickTextColor, textColor }) {
   const links = Array.isArray(data.links) ? data.links : []
   const cta = data.cta || { href: "#", label: "Começar" }
   return (
-    <nav className="border-b border-slate-200 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
+    <nav className="relative z-50 border-b border-slate-200 bg-white/70 backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
       <Container>
         <div className="flex h-14 items-center justify-between">
           <div className="font-semibold text-slate-900 dark:text-white">{data.logo ?? "LOGO"}</div>
@@ -84,10 +160,24 @@ function Navbar({ theme, data = {}, dark, setDark }) {
             <a href={cta.href} className="rounded border px-3 py-1 text-sm" style={{ borderColor: theme, color: theme }}>
               {cta.label}
             </a>
-            <ThemeToggle dark={dark} setDark={setDark} />
+            <ColorPicker color={bgColor} onChange={onPickBgColor} label="Fundo" />
+            <ColorPicker
+              color={textColor}
+              onChange={onPickTextColor}
+              label="Texto"
+              palette={["#000000", "#ffffff", "#111827", "#6b7280", "#9ca3af", "#d1d5db"]}
+            />
           </div>
           <div className="sm:hidden">
-            <ThemeToggle dark={dark} setDark={setDark} />
+            <div className="inline-flex items-center gap-2">
+              <ColorPicker color={bgColor} onChange={onPickBgColor} label="Fundo" />
+              <ColorPicker
+                color={textColor}
+                onChange={onPickTextColor}
+                label="Texto"
+                palette={["#000000", "#ffffff", "#111827", "#6b7280", "#9ca3af", "#d1d5db"]}
+              />
+            </div>
           </div>
         </div>
       </Container>
@@ -152,22 +242,38 @@ function Hero({ theme, data = {}, lp }) {
 }
 
 /* logos */
-function Logos({ items = [] }) {
-  const list = items.length ? items : ["LOGO", "LOGO", "LOGO", "LOGO", "LOGO"]
+function PromoBanner({ theme, data = {}, lp }) {
+  const btnText = data.btnText ?? "Assine Já"
+  const btnHref = data.btnHref ?? "#pricing"
+  const onClick = () => logEvent("cta_click", { lp_id: lp?.id, cta_id: "banner", target: btnHref })
+  const nav = useNavigate()
+
+  const hasImg = !!data.img
+  const heightPx = Math.max(120, Number.parseInt(data.height, 10) || 288) // altura editável; default 288px
   return (
-    <Section id="logos">
-      <Container>
-        <div className="grid grid-cols-2 items-center justify-items-center gap-6 opacity-80 sm:grid-cols-3 md:grid-cols-5">
-          {list.map((t, i) => (
-            <div
-              key={i}
-              className="h-10 w-28 rounded border border-slate-200 bg-white/70 text-center text-xs leading-10 text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400"
+    <Section id="banner">
+      <div className="relative w-full">
+        {hasImg ? (
+          <img src={data.img} alt="banner" className="w-full object-cover" style={{ height: heightPx }} />
+        ) : (
+          <div className="grid w-full place-items-center border-y border-dashed border-slate-300 text-slate-400 dark:border-slate-700" style={{ height: heightPx }}>
+            Imagem do banner (ex.: 1600x400)
+          </div>
+        )}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="pointer-events-auto absolute bottom-4 left-1/2 -translate-x-1/2 transform">
+            <a
+              href={btnHref}
+              onClick={(e)=>{ e.preventDefault(); onClick(); if (lp?.id) nav(`/checkout/${lp.id}`) }}
+              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-medium text-white shadow-md transition hover:-translate-y-0.5"
+              style={{ background: theme }}
             >
-              {t}
-            </div>
-          ))}
+              {btnText}
+              <span aria-hidden className="text-lg">→</span>
+            </a>
+          </div>
         </div>
-      </Container>
+      </div>
     </Section>
   )
 }
@@ -221,8 +327,17 @@ function HowItWorks({ steps = [] }) {
 /* pricing */
 function Pricing({ theme, data = {}, lp }) {
   const plans = Array.isArray(data.plans) ? data.plans : []
+  const nav = useNavigate()
+  const parsePrice = (txt) => {
+    if (typeof txt !== "string") return Number(txt || 0)
+    const cleaned = txt.replace(/[^0-9,.]/g, "").replace(/\./g, "").replace(",", ".")
+    const n = Number(cleaned)
+    return Number.isFinite(n) ? n : 0
+  }
   const onBuy = (plan) => {
     logEvent("cta_click", { lp_id: lp?.id, cta_id: `buy_${plan?.name}`, target: "#buy" })
+    const price = parsePrice(plan?.price)
+    if (lp?.id) nav(`/checkout/${lp.id}?plan=${encodeURIComponent(plan?.name || "")}&price=${price}`)
   }
   return (
     <Section id="pricing">
@@ -356,7 +471,7 @@ export default function SaaSTemplate({ lp }) {
       hero: { ...(base.hero || {}), ...(c.hero || {}) },
       features: c.features ?? base.features ?? [],
       pricing: { ...(base.pricing || {}), ...(c.pricing || {}) },
-      logos: c.logos ?? base.logos ?? [],
+      banner: { ...(base.banner || {}), ...(c.banner || {}) },
       steps: c.steps ?? base.steps ?? [],
       screenshots: c.screenshots ?? base.screenshots ?? [],
       testimonials: c.testimonials ?? base.testimonials ?? [],
@@ -366,34 +481,99 @@ export default function SaaSTemplate({ lp }) {
     }
   }, [safeLP, base])
 
-  // Dark mode local por LP (persistência simples)
-  const storageKey = `plp:lp:${safeLP.id ?? "unknown"}:saas:dark`
-  const [dark, setDark] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(storageKey) || "false") } catch { return false }
+  // Cor de fundo da página (persistência por LP)
+  const bgKey = `plp:lp:${safeLP.id ?? "unknown"}:saas:bg`
+  const defaultBg = "#0f172a" // antigo dark bg (slate-900) como azul escuro
+  const [bg, setBg] = useState(() => {
+    try {
+      const saved = localStorage.getItem(bgKey)
+      return saved || defaultBg
+    } catch {
+      return defaultBg
+    }
   })
 
   useEffect(() => {
-    try { localStorage.setItem(storageKey, JSON.stringify(dark)) } catch {
-      // Ignore
-    }
-  }, [dark, storageKey])
+    try { localStorage.setItem(bgKey, bg) } catch {/* ignore */}
+  }, [bg, bgKey])
 
-  // aplica/remove classe no <html>
   useEffect(() => {
-    const root = document.documentElement
-    if (dark) root.classList.add("dark")
-    else root.classList.remove("dark")
-    return () => {
-      // opcional: ao desmontar, remover para não vazar p/ outras páginas
-      root.classList.remove("dark")
+    try {
+      const saved = localStorage.getItem(bgKey)
+      setBg(saved || defaultBg)
+    } catch {
+      setBg(defaultBg)
     }
-  }, [dark])
+  }, [bgKey])
+
+  // Aplica automaticamente classe 'dark' baseado na luminosidade do fundo
+  useEffect(() => {
+    function hexToRgb(hex) {
+      const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
+      if (!m) return { r: 255, g: 255, b: 255 }
+      return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) }
+    }
+    function isDarkColor(hex) {
+      const { r, g, b } = hexToRgb(hex || "#ffffff")
+      // luminância relativa simples
+      const luminance = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255)
+      return luminance < 0.5
+    }
+    const root = document.documentElement
+    if (isDarkColor(bg)) root.classList.add("dark")
+    else root.classList.remove("dark")
+  }, [bg])
+
+  // Cor do texto (persistência por LP)
+  const fgKey = `plp:lp:${safeLP.id ?? "unknown"}:saas:fg`
+  const [fg, setFg] = useState(() => {
+    try {
+      const saved = localStorage.getItem(fgKey)
+      if (saved) return saved
+    } catch { /* ignore read errors */ }
+    // sem salvo: define com base no bg atual salvo ou padrão
+    try {
+      const savedBg = localStorage.getItem(bgKey) || defaultBg
+      const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(savedBg)
+      const r = m ? parseInt(m[1], 16) : 0
+      const g = m ? parseInt(m[2], 16) : 0
+      const b = m ? parseInt(m[3], 16) : 0
+      const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255)
+      return lum < 0.5 ? "#ffffff" : "#111827"
+    } catch {
+      return "#ffffff"
+    }
+  })
+
+  useEffect(() => {
+    try { localStorage.setItem(fgKey, fg) } catch {/* ignore */}
+  }, [fg, fgKey])
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(fgKey)
+      if (saved) setFg(saved)
+      else {
+        // recalcula default a partir do bg atual
+        const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(bg)
+        const r = m ? parseInt(m[1], 16) : 0
+        const g = m ? parseInt(m[2], 16) : 0
+        const b = m ? parseInt(m[3], 16) : 0
+        const lum = 0.2126 * (r / 255) + 0.7152 * (g / 255) + 0.0722 * (b / 255)
+        setFg(lum < 0.5 ? "#ffffff" : "#111827")
+      }
+    } catch { /* ignore read errors */ }
+  }, [fgKey, bg])
 
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900">
-      <Navbar theme={content.theme} data={content.navbar} dark={dark} setDark={setDark} />
+    <div className="min-h-screen" style={{ background: bg }} data-plp-text-root="1">
+      {/* Força a cor do texto em todo o subtree */}
+      {fg ? (
+        <style>{`[data-plp-text-root="1"], [data-plp-text-root="1"] * { color: ${fg} !important; }`}</style>
+      ) : null}
+      <Navbar theme={content.theme} data={content.navbar} onPickBgColor={setBg} bgColor={bg} onPickTextColor={setFg} textColor={fg} />
       <Hero theme={content.theme} data={content.hero} lp={safeLP} />
-      <Logos items={content.logos} />
+      <PromoBanner theme={content.theme} data={content.banner} lp={safeLP} />
       <Features data={content.features} />
       <HowItWorks steps={content.steps} />
       {Array.isArray(content.screenshots) && content.screenshots.length > 0 && (

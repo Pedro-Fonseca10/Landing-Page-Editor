@@ -314,6 +314,53 @@ export default function LandingPageEditor() {
               </div>
             </section>
 
+            {/* Banner panorâmico */}
+            <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Banner</h2>
+              <div className="mt-4 grid gap-4">
+                <div className="grid gap-1.5">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-200">URL da imagem</label>
+                  <input
+                    className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                    placeholder="Ex.: /banner.jpg (1600x400)"
+                    value={getSaaSValue(["banner","img"], "")}
+                    onChange={(e)=>onChangePath(["banner","img"], e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-1.5 sm:grid-cols-3">
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Altura (px)</label>
+                    <input
+                      type="number"
+                      min={120}
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                      placeholder="Ex.: 288"
+                      value={getSaaSValue(["banner","height"], 288)}
+                      onChange={(e)=>onChangePath(["banner","height"], Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Texto do botão</label>
+                    <input
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                      placeholder="Assine Já"
+                      value={getSaaSValue(["banner","btnText"], "Assine Já")}
+                      onChange={(e)=>onChangePath(["banner","btnText"], e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-1.5">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Link do botão</label>
+                    <input
+                      className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                      placeholder="#pricing"
+                      value={getSaaSValue(["banner","btnHref"], "#pricing")}
+                      onChange={(e)=>onChangePath(["banner","btnHref"], e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Recursos */}
             <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
               <div className="flex items-baseline justify-between">

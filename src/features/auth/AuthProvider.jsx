@@ -9,8 +9,13 @@ export function AuthProvider({ children }) {
     else if (email === "membro" && password === "123") setUser({ email, role: "member" })
     else throw new Error("Credenciais inválidas")
   }
+  const register = (email, password) => {
+    // Registro simplificado: cria usuário com role "customer"
+    if (!email || !password) throw new Error("Preencha e-mail e senha")
+    setUser({ email, role: "customer" })
+  }
   const logout = () => setUser(null)
-  return <AuthCtx.Provider value={{ user, login, logout }}>{children}</AuthCtx.Provider>
+  return <AuthCtx.Provider value={{ user, login, register, logout }}>{children}</AuthCtx.Provider>
 }
 
 export { AuthCtx }

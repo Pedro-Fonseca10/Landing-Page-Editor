@@ -15,6 +15,7 @@ import PublicPage from "../features/lps/PublicPage"
 
 import GatewayMock from "../features/payments/GatewayMock"
 import PaymentCallback from "../features/payments/PaymentCallback"
+import Checkout from "../features/checkout/Checkout"
 
 export default function AppRouter() {
   return (
@@ -29,6 +30,7 @@ export default function AppRouter() {
           <Route path="/preview/:id" element={<ProtectedRoute><LandingPagePreview /></ProtectedRoute>} />
           <Route path="/metrics" element={<ProtectedRoute><MetricsPage /></ProtectedRoute>} />
           <Route path="/lp/:slug" element={<PublicPage />} />
+          <Route path="/checkout/:id" element={<Checkout />} />
           <Route path="/pay/:orderId" element={<GatewayMock />} />
           <Route path="/payment/callback" element={<PaymentCallback />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
@@ -37,4 +39,3 @@ export default function AppRouter() {
     </BrowserRouter>
   )
 }
-

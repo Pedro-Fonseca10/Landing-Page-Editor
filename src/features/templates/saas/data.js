@@ -24,6 +24,12 @@ const data = {
     { title: "Métricas nativas", text: "Acompanhe visitas, CTR, conversões e rejeição." },
     { title: "Templates prontos", text: "Modelos para SaaS, eventos, produtos e mais." }
   ],
+  banner: {
+    img: "", // imagem panorâmica (ex.: 1600x400)
+    height: 288, // altura em px (editável)
+    btnText: "Assine Já",
+    btnHref: "#pricing"
+  },
   pricing: {
     subtitle: "Escolha o plano ideal",
     plans: [
