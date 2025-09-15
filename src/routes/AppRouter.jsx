@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard"
 import { AuthProvider } from "../features/auth/AuthProvider"
 import ProtectedRoute from "../features/auth/ProtectedRoute"
 import ClientsPage from "../features/clients/ClientsPage"
+import SignupsPage from "../features/signups/SignupsPage"
 
 import LandingPagesPage from "../features/lps/LandingPagesPage"
 import LandingPageEditor from "../features/lps/LandingPageEditor"
@@ -25,6 +26,7 @@ export default function AppRouter() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/clients" element={<ProtectedRoute><ClientsPage /></ProtectedRoute>} />
+          <Route path="/signups" element={<ProtectedRoute><SignupsPage /></ProtectedRoute>} />
           <Route path="/lps" element={<ProtectedRoute><LandingPagesPage /></ProtectedRoute>} />
           <Route path="/lps/:id/edit" element={<ProtectedRoute><LandingPageEditor /></ProtectedRoute>} />
           <Route path="/preview/:id" element={<ProtectedRoute><LandingPagePreview /></ProtectedRoute>} />

@@ -7,12 +7,13 @@ import { Repo } from "../lib/repo"
 export default function Dashboard() {
   const { user } = useAuth()
   const displayName = user?.email || "Usuário"
-  const [counts, setCounts] = useState({ clientes: 0, lps: 0 })
+  const [counts, setCounts] = useState({ clientes: 0, lps: 0, cadastros: 0 })
 
   const reload = () => {
     const clientes = Repo.list("clientes")
     const lps = Repo.list("lps")
-    setCounts({ clientes: clientes.length, lps: lps.length })
+    const cadastros = Repo.list("cadastros")
+    setCounts({ clientes: clientes.length, lps: lps.length, cadastros: cadastros.length })
   }
 
   useEffect(() => { reload() }, [])
@@ -47,7 +48,7 @@ export default function Dashboard() {
           <p className="mt-3 text-slate-600 dark:text-slate-300">Selecione uma seção para começar.</p>
         </header>
 
-        <section aria-label="Resumo rápido" className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+        <section aria-label="Resumo rápido" className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
             <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-sky-200/40 blur-2xl dark:bg-sky-500/20" />
             <div className="flex items-start justify-between">
@@ -83,6 +84,23 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Atualizado agora</p>
+          </div>
+
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-amber-200/40 blur-2xl dark:bg-amber-500/20" />
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Cadastrados</p>
+                <p className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{counts.cadastros}</p>
+              </div>
+              <div className="rounded-lg bg-amber-100 p-2 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:ring-amber-800">
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">Coletados via LPs</p>
           </div>
         </section>
 
@@ -127,6 +145,28 @@ export default function Dashboard() {
               <div className="flex-1">
                 <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Landing Pages</h3>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Crie e edite páginas rapidamente.</p>
+              </div>
+              <svg className="mt-1 h-5 w-5 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-600 dark:group-hover:text-slate-200" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </Link>
+
+          <Link
+            to="/signups"
+            className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-sm ring-0 transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:shadow-slate-900/40 dark:focus:ring-sky-700/40"
+          >
+            <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-amber-200/40 blur-2xl dark:bg-amber-500/20" />
+            <div className="relative flex items-start gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-700 ring-1 ring-inset ring-amber-200 dark:bg-amber-900/40 dark:text-amber-300 dark:ring-amber-800">
+                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Cadastrados</h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Veja os contatos capturados.</p>
               </div>
               <svg className="mt-1 h-5 w-5 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-slate-600 dark:group-hover:text-slate-200" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />

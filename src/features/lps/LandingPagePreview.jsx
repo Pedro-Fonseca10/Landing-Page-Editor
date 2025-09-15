@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { useLocation, useParams, Link, useNavigate } from "react-router-dom"
 import { Repo } from "../../lib/repo"
 import TemplateRenderer from "./TemplateRenderer"
+import PublicImageSaver from "./PublicImageSaver"
 
 export default function LandingPagePreview() {
   const { id } = useParams()
@@ -160,6 +161,7 @@ export default function LandingPagePreview() {
             </button>
             <Link className="border rounded px-3 py-1" to={`/lps/${lp.id}/edit`}>Editar</Link>
             <Link className="border rounded px-3 py-1" to="/lps">Lista de LPs</Link>
+            <PublicImageSaver lp={lp} />
           </div>
         </div>
       </div>
