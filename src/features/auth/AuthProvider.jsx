@@ -1,6 +1,9 @@
-import { createContext, useState } from "react"  // remova o useContext daqui
+/*
+  Gerencia o estado do usuário e fornece funções de login, registro e logout.
+*/
 
-const AuthCtx = createContext(null)
+import { useState } from "react"  
+
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -17,5 +20,3 @@ export function AuthProvider({ children }) {
   const logout = () => setUser(null)
   return <AuthCtx.Provider value={{ user, login, register, logout }}>{children}</AuthCtx.Provider>
 }
-
-export { AuthCtx }

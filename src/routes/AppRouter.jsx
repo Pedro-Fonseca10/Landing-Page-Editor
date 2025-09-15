@@ -1,3 +1,9 @@
+/*
+  Componente de rota principal da aplicação. Define todas as rotas usando react-router-dom.
+  Inclui rotas protegidas que requerem autenticação.
+  Fornece contexto de autenticação para toda a aplicação.
+*/
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import Login from "../pages/Login"
 import Dashboard from "../pages/Dashboard"

@@ -1,3 +1,9 @@
+/*
+  Componente de dashboard principal da aplicação. Exibe um resumo das principais seções e estatísticas.
+  Fornece links de navegação para outras páginas protegidas.
+  Utiliza contexto de autenticação para exibir informações do usuário.
+*/
+
 import { Link } from "react-router-dom"
 import { useEffect, useState } from "react"
 import AppFooter from "../components/AppFooter"

@@ -1,3 +1,9 @@
+/*
+  Componente de página de login. Fornece um formulário para autenticação do usuário.
+  Utiliza contexto de autenticação para gerenciar o estado de login.
+  Redireciona para o dashboard após login bem-sucedido.
+*/
+
 import { useState, useEffect } from "react"
 import AppFooter from "../components/AppFooter"
 import { useNavigate } from "react-router-dom"
@@ -12,7 +18,7 @@ export default function Login() {
   const nav = useNavigate()
   const { login, logout } = useAuth()
 
-  // Ao montar, sempre faz logout para forçar autenticação
+  // Ao voltar, sempre faz logout para forçar autenticação
   useEffect(() => {
     logout()
     // eslint-disable-next-line

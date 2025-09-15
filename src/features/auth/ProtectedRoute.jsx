@@ -1,3 +1,9 @@
+/*
+  Componente de rota protegida que verifica autenticação e autorização do usuário.
+  Redireciona para a página de login se o usuário não estiver autenticado.
+  Exibe mensagem de acesso negado se o usuário não tiver a função necessária.
+*/
+
 import { Navigate } from "react-router-dom"
 import { useAuth } from "./useAuth"
 
