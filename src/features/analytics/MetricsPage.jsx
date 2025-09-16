@@ -239,24 +239,27 @@ export default function MetricsPage() {
   )
 }
 
+// Cartão de métrica
 function Card({ title, value }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
-      <div className="text-sm text-slate-600 dark:text-slate-300">{title}</div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">{value}</div>
+      <div className="text-sm text-slate-900 dark:text-slate-300">{title}</div>
+      <div className="mt-2 text-2xl font-semibold text-slate-600 dark:text-white">{value}</div>
     </div>
   )
 }
 
+// Células de tabela
 function Th({ children }) {
   return <th className="p-3 text-left text-sm font-medium text-slate-700 dark:text-slate-200">{children}</th>
 }
 
+// Células de tabela
 function Td({ children, colSpan }) {
   return <td colSpan={colSpan} className="p-3 text-slate-900 dark:text-slate-100">{children}</td>
 }
 
-// Date input com calendário custom (maior + dark mode), com min/max
+// Date input com calendário 
 function DateInput({ id, value, onChange, min, max }) {
   const [open, setOpen] = useState(false)
   const anchorRef = useRef(null)
@@ -268,7 +271,7 @@ function DateInput({ id, value, onChange, min, max }) {
   const monthNames = [
     'janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'
   ]
-
+  // Fecha calendário ao clicar fora
   useEffect(() => {
     const onDocDown = (e) => {
       const a = anchorRef.current
@@ -282,12 +285,14 @@ function DateInput({ id, value, onChange, min, max }) {
     return () => document.removeEventListener('mousedown', onDocDown)
   }, [])
 
+  // Sincroniza mês com valor
   useEffect(() => {
     if (!value) return
     const d = parse(value)
     if (d) setMonth(new Date(d.getFullYear(), d.getMonth(), 1))
   }, [value])
 
+  // Gera matriz de semanas do mês
   const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1)
   const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0)
   const firstWeekday = (startOfMonth.getDay() + 6) % 7
@@ -300,6 +305,7 @@ function DateInput({ id, value, onChange, min, max }) {
     weeks.push(week)
   }
 
+  // Verifica se data está dentro dos limites min/max
   const minDate = min ? parse(min) : null
   const maxDate = max ? parse(max) : null
   const inBounds = (d) => {
@@ -315,7 +321,8 @@ function DateInput({ id, value, onChange, min, max }) {
     }
     return true
   }
-
+  
+  // Posiciona painel
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const computePos = () => {
     if (!anchorRef.current) return
@@ -339,6 +346,7 @@ function DateInput({ id, value, onChange, min, max }) {
     }
   }, [open])
 
+  // Navegação de meses
   const MIN_YEAR = 2025
   const setMonthSafe = (y, m) => {
     let d = new Date(y, m, 1)
@@ -357,7 +365,8 @@ function DateInput({ id, value, onChange, min, max }) {
   const maxYear = maxDate ? maxDate.getFullYear() : baseYear + 50
   const years = []
   for (let y = minYear; y <= maxYear; y++) years.push(y)
-
+  
+  // Render
   return (
     <div ref={anchorRef} className="relative">
       <div className="flex items-center">
