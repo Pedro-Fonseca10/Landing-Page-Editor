@@ -1,3 +1,7 @@
+/*
+  Roda a página de clientes, onde é possível adicionar, editar e excluir clientes.
+*/
+
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import AppFooter from "../../components/AppFooter"
@@ -36,7 +40,7 @@ export default function ClientsPage() {
       const novoCliente = { id: newId, nome: form.nome, setor: form.setor }
       persist([novoCliente, ...list])
     }
-    
+    // Limpa o formulário
     setForm({ id: null, nome: "", setor: "" })
   }
   
@@ -49,6 +53,7 @@ export default function ClientsPage() {
     persist(next)
   }
 
+  // Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -71,7 +76,7 @@ export default function ClientsPage() {
             </button>
           </div>
         </header>
-
+        {/* Mensagem de erro */}
         {error && (
           <div role="alert" className="mb-6 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
             <svg className="mt-0.5 h-5 w-5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.5a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 8a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd"/></svg>
@@ -81,14 +86,14 @@ export default function ClientsPage() {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
-            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Adicionar/Editar Cliente</h2>
+            <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Adicionar Cliente</h2>
             <form onSubmit={onSubmit} className="mt-4 grid gap-4">
               <div className="grid gap-1.5">
                 <label htmlFor="nome" className="text-sm font-medium text-slate-700 dark:text-slate-200">Nome</label>
                 <input
                   id="nome"
                   className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
-                  placeholder="Ex.: Cliente ACME"
+                  placeholder="Ex.: Nome do Cliente"
                   value={form.nome}
                   onChange={(e)=>setForm({...form, nome:e.target.value})}
                 />
@@ -105,6 +110,7 @@ export default function ClientsPage() {
               </div>
               <div className="flex gap-2">
                 <button className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40">
+                  {/* <span className="sr-only">{form.id ? "Salvar" : "Adicionar"} cliente</span> */}
                   {form.id ? "Salvar" : "Adicionar"}
                 </button>
                 {form.id && (
@@ -119,7 +125,7 @@ export default function ClientsPage() {
               </div>
             </form>
           </section>
-
+          {/* Lista de clientes */}
           <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
             <div className="flex items-baseline justify-between">
               <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Lista de Clientes</h2>

@@ -1,9 +1,20 @@
+/*
+  Tela de checkout simples, com:
+  - Seleção de plano (se houver mais de um)
+  - Login ou registro (se não estiver logado)
+  - Formulário de dados pessoais
+  - Cupom de desconto
+  - Resumo do pedido e botão para continuar para pagamento
+*/
+
+
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams, useLocation } from "react-router-dom"
 import { Repo } from "../../lib/repo"
 import { useAuth } from "../auth/useAuth"
 import { createOrder } from "../orders/orders"
 
+// Componentes
 function Section({ title, children }) {
   return (
        <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
@@ -13,11 +24,13 @@ function Section({ title, children }) {
   )
 }
 
+// Formata número como moeda BRL (R$ 0,00)
 function currencyBRL(n) {
   const v = Number(n || 0)
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
 }
 
+// Converte string de preço (ex.: "R$ 10,00") em número (10.00)
 function parsePrice(txt) {
   if (typeof txt !== "string") return Number(txt || 0)
   const cleaned = txt.replace(/[^0-9,.]/g, "").replace(/\./g, "").replace(",", ".")
@@ -33,11 +46,13 @@ const COUPONS = {
   CUPOM50: { type: "percent", value: 50 },
 }
 
+// Hook para ler query string
 function useQuery() {
   const { search } = useLocation()
   return useMemo(() => new URLSearchParams(search), [search])
 }
 
+// Componente principal
 export default function Checkout() {
   const { id } = useParams()
   const q = useQuery()
@@ -50,7 +65,7 @@ export default function Checkout() {
   const plans = useMemo(() => lp?.content?.pricing?.plans || [], [lp])
   const primary = useMemo(() => lp?.content?.theme || "#0ea5e9", [lp])
 
-  // Aparência herdada do template (bg + texto)
+  // Aparência herdada do template
   const isSaaS = lp?.id_template === "saas"
   const bgKey = useMemo(() => (isSaaS ? `plp:lp:${lp?.id ?? "unknown"}:saas:bg` : null), [isSaaS, lp?.id])
   const [bg, setBg] = useState(() => (isSaaS ? "#0f172a" : "#ffffff"))
@@ -80,9 +95,7 @@ export default function Checkout() {
     else root.classList.remove("dark")
   }, [bg])
 
-  
-
-  // fallback de preço/plano se não vier query (ex.: Assine Já)
+  // Plano padrão 
   const fallbackPlanPrice = useMemo(() => {
     const featured = plans.find(p => p?.featured)
     const pick = featured || plans[0]
@@ -132,6 +145,7 @@ export default function Checkout() {
     return data
   }
 
+  // Sempre que o CEP mudar, tenta buscar o endereço
   useEffect(() => {
     const raw = form.cep || ""
     const cep = onlyDigits(raw)
@@ -160,6 +174,7 @@ export default function Checkout() {
     return () => { if (cepDebounceRef.current) clearTimeout(cepDebounceRef.current) }
   }, [form.cep])
 
+  // Cupom de desconto
   const [coupon, setCoupon] = useState("")
   const [applied, setApplied] = useState(null) // { code, amount }
   const applyCoupon = () => {
@@ -191,6 +206,7 @@ export default function Checkout() {
 
   if (!lp) return <div className="p-6">Página não encontrada.</div>
 
+  // Render
   return (
     <div className="min-h-screen" style={{ background: bg }}>
       <div className="mx-auto max-w-5xl px-6 py-10 lg:py-16">

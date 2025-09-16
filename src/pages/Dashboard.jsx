@@ -24,6 +24,7 @@ export default function Dashboard() {
 
   useEffect(() => { reload() }, [])
 
+  // Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
