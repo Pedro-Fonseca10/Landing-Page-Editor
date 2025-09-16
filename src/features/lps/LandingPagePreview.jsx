@@ -1,3 +1,8 @@
+/*
+  Componente de pré-visualização da landing page.
+  Busca a LP pelo ID na URL e exibe usando o TemplateRenderer.
+*/
+
 import { useEffect, useState, useCallback, useRef, useMemo } from "react"
 import { useLocation, useParams, Link, useNavigate } from "react-router-dom"
 import { Repo } from "../../lib/repo"
@@ -30,6 +35,11 @@ export default function LandingPagePreview() {
     currentIdRef.current = targetId
     searchAttemptsRef.current++
     
+    /* 
+      O trecho seguinte existe pois estava tendo problemas de cache com o Repo
+      Assim, fazemos a busca diretamente no localStorage
+      Evitando efeitos de deleção em cascata ou problemas de cache
+    */
     try {
       // Busca direta no localStorage para evitar cache
       const rawData = localStorage.getItem('plp:lps')
@@ -81,11 +91,6 @@ export default function LandingPagePreview() {
     if (!componentMountedRef.current) { return }
     
     const targetId = String(id)
-    console.log(`=== PREVIEW EFFECT TRIGGERED ===`)
-    console.log(`ID da URL: ${targetId}`)
-    console.log(`State lpId: ${state?.lpId}`)
-    console.log(`Current ID ref: ${currentIdRef.current}`)
-    console.log(`Component Key: ${componentKey}`)
     
     // Reset completo do estado
     setLp(null)
@@ -116,8 +121,6 @@ export default function LandingPagePreview() {
       currentIdRef.current = null
     }
   }, [id, findLandingPage, componentKey, state?.lpId])
-
-  // (removido) logs de debug do estado
 
   // Verificação de segurança: se o ID mudou mas a LP não corresponde, redirecionar
   useEffect(() => {
@@ -154,13 +157,12 @@ export default function LandingPagePreview() {
           <div className="flex gap-2">
             <button
               className="border rounded px-3 py-1"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/lps")}
               type="button"
             >
               Voltar
             </button>
             <Link className="border rounded px-3 py-1" to={`/lps/${lp.id}/edit`}>Editar</Link>
-            <Link className="border rounded px-3 py-1" to="/lps">Lista de LPs</Link>
             <PublicImageSaver lp={lp} />
           </div>
         </div>

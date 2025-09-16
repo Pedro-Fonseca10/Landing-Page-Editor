@@ -1,3 +1,7 @@
+/*
+  Componente de Cadastro de potenciais Leads
+*/
+
 import { useMemo, useRef, useState } from "react"
 import { Repo } from "../../lib/repo"
 import { uid } from "../../lib/uid"
@@ -9,12 +13,13 @@ export default function SignupButton({ lpId, lpSlug }) {
   const [error, setError] = useState("")
   const formRef = useRef(null)
 
+  // Abre o pop-up de cadastro
   const toggle = () => {
     const next = !open
     setOpen(next)
     if (next) logEvent("signup_open", { lp_id: lpId, lp_slug: lpSlug })
   }
-
+  // Salva o nome e o email 
   const onSubmit = (e) => {
     e.preventDefault()
     setError("")
@@ -34,7 +39,7 @@ export default function SignupButton({ lpId, lpSlug }) {
       return
     }
 
-    // Duplicate checks
+    // Checa se já está cadastrado
     const all = Repo.list("cadastros")
     const emailLower = email.toLowerCase()
     const nomeLower = nome.toLowerCase()
@@ -68,7 +73,6 @@ export default function SignupButton({ lpId, lpSlug }) {
       setSent(true)
       logEvent("signup_submit", { lp_id: lpId, lp_slug: lpSlug, status: "success" })
       formRef.current?.reset()
-      // auto-close after short delay
       setTimeout(() => { setOpen(false); setSent(false) }, 1800)
     } catch (err) {
       console.error("Erro ao salvar cadastro", err)
@@ -77,13 +81,12 @@ export default function SignupButton({ lpId, lpSlug }) {
     }
   }
 
-  // do not render if not on a LP
   const disabled = useMemo(() => !lpId, [lpId])
   if (disabled) return null
 
+  // Render
   return (
     <>
-      {/* Floating button */}
       <button
         onClick={toggle}
         className="fixed bottom-5 right-5 z-30 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white px-4 py-2 text-sm font-medium text-sky-700 shadow-md transition hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-sky-800 dark:bg-slate-900 dark:text-sky-300 dark:hover:bg-slate-800 dark:focus:ring-sky-700/40"
@@ -97,7 +100,6 @@ export default function SignupButton({ lpId, lpSlug }) {
         Cadastre-se
       </button>
 
-      {/* Overlay panel */}
       {open && (
         <div className="fixed inset-0 z-40 flex items-end justify-end p-5">
           <div

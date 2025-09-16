@@ -1,3 +1,8 @@
+/*
+  Editor de landing page, com campos dinâmicos conforme o template.
+  Atualmente só há um template (SaaS), mas a estrutura já prevê múltiplos templates.
+*/
+
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Repo } from "../../lib/repo"
@@ -5,14 +10,16 @@ import { defaultContent } from "./defaultContent"
 import saasDefault from "../templates/saas/data"
 import AppFooter from "../../components/AppFooter"
 
+// Componente do editor de LP
 export default function LandingPageEditor() {
   const { id } = useParams()
   const nav = useNavigate()
   const [lp, setLp] = useState(null)
   const [content, setContent] = useState(defaultContent)
-  // Estado local para edição de texto livre (preserva espaços e quebras de linha)
+  // Estado local para edição de texto livre 
   const [featuresTextByIndex, setFeaturesTextByIndex] = useState({})
 
+  // Carrega a LP do repositório
   useEffect(() => {
     const found = Repo.get("lps", id)
     if (!found) return nav("/lps")
@@ -28,7 +35,7 @@ export default function LandingPageEditor() {
 
   const onChange = (k, v) => setContent(prev => ({ ...prev, [k]: v }))
 
-  // Atualização imutável por caminho (ex.: ["hero", "title"]) para templates com conteúdo aninhado
+  // Atualização por caminho 
   const setIn = (obj, path, value) => {
     if (!Array.isArray(path) || !path.length) return obj
     const [head, ...rest] = path
@@ -122,7 +129,7 @@ export default function LandingPageEditor() {
       })
     }
 
-    // ===== Recursos (features)
+    // Recursos 
     const featuresFromContent = Array.isArray(content?.features) ? content.features : null
     const featuresDefault = getSaaSValue(["features"], [])
     const features = featuresFromContent ?? featuresDefault
@@ -145,7 +152,7 @@ export default function LandingPageEditor() {
       return { ...(prev || {}), features: list }
     })
 
-    // ===== Como funciona (steps)
+    // Como funciona 
     const stepsFromContent = Array.isArray(content?.steps) ? content.steps : null
     const stepsDefault = getSaaSValue(["steps"], [])
     const steps = stepsFromContent ?? stepsDefault
@@ -168,7 +175,7 @@ export default function LandingPageEditor() {
       return { ...(prev || {}), steps: list }
     })
 
-    // ===== Depoimentos (testimonials)
+    // Depoimentos 
     const testimonialsFromContent = Array.isArray(content?.testimonials) ? content.testimonials : null
     const testimonialsDefault = getSaaSValue(["testimonials"], [])
     const testimonials = testimonialsFromContent ?? testimonialsDefault
@@ -191,7 +198,7 @@ export default function LandingPageEditor() {
       return { ...(prev || {}), testimonials: list }
     })
 
-    // ===== FAQ
+    // FAQ
     const faqFromContent = Array.isArray(content?.faq) ? content.faq : null
     const faqDefault = getSaaSValue(["faq"], [])
     const faq = faqFromContent ?? faqDefault
@@ -214,12 +221,14 @@ export default function LandingPageEditor() {
       return { ...(prev || {}), faq: list }
     })
 
-    // ===== Estilo do botão Enviar (LeadForm)
+    // Estilo do botão Enviar (LeadForm)
     const leadFormTextWhite = !!content?.leadForm?.textWhite
     const setLeadFormTextWhite = (checked) => setContent(prev => ({
       ...(prev || {}),
       leadForm: { ...(prev?.leadForm || {}), textWhite: !!checked }
     }))
+
+    // Render do editor SaaS
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
         <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -442,7 +451,7 @@ export default function LandingPageEditor() {
                           <label className="text-sm font-medium text-slate-700 dark:text-slate-200">Ícone (emoji)</label>
                           <input
                             className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-slate-900 outline-none ring-0 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
-                            placeholder="😀"
+                            placeholder="💸"
                             value={getSaaSValue(["steps", i, "icon"], s?.icon || "")}
                             onChange={(e)=>updateStep(i, "icon", e.target.value)}
                           />
@@ -663,8 +672,6 @@ export default function LandingPageEditor() {
     )
   }
 
-  
-  
   // Editor genérico (templates simples)
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">

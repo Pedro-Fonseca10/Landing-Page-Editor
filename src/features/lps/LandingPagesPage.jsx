@@ -1,3 +1,7 @@
+/*
+  Página de gerenciamento de landing pages.
+*/
+
 import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import AppFooter from "../../components/AppFooter"
@@ -6,6 +10,7 @@ import { TEMPLATES } from "../templates/catalog"
 import { exportLandingPageZip } from "./exporter"
 import { generateUniqueId } from "../../lib/uid"
 
+// Página de gerenciamento de landing pages
 export default function LandingPagesPage() {
   const navigate = useNavigate()
   const [clientes, setClientes] = useState([])
@@ -13,6 +18,7 @@ export default function LandingPagesPage() {
   const [form, setForm] = useState({ id: null, titulo: "", id_cliente: "", id_template: "saas" })
   const [error, setError] = useState(null)
 
+  // Atualização constante das lps
   const reload = () => {
     const clientesData = Repo.list("clientes")
     const lpsData = Repo.list("lps")
@@ -21,6 +27,7 @@ export default function LandingPagesPage() {
   }
   useEffect(() => { reload() }, [])
 
+  // Preencher os dados da landing page a ser criada
   const onSubmit = (e) => {
     e.preventDefault()
     setError(null)
@@ -46,7 +53,7 @@ export default function LandingPagesPage() {
     setForm({ id: null, titulo: "", id_cliente: "", id_template: "saas" })
     reload()
   }
-
+  // Deletar uma landing page
   const delOne = (lpId) => {
     Repo.remove("lps", lpId)
     reload()
@@ -58,6 +65,7 @@ export default function LandingPagesPage() {
   )
   const templateName = (id) => TEMPLATES.find(t => t.id === id)?.nome ?? id
 
+  // Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">

@@ -1,3 +1,7 @@
+/*
+  Componente responsável por renderizar as diferentes templates
+*/
+
 import { useEffect } from "react"
 import { logEvent } from "../analytics/analytics"
 import SaaSTemplate from "../templates/saas/SaaSTemplate"

@@ -1,3 +1,7 @@
+/*
+  Funções para landing pages (LPs).
+*/
+
 import { load } from "../../lib/storage"
 export function findLpBySlug(slug) {
   const lps = load("lps", [])

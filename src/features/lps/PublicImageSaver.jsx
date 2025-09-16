@@ -1,3 +1,9 @@
+/*
+  Componente para salvar imagens na pasta public/ do projeto.
+  Usa File System Access API se disponível, senão faz download do arquivo.
+  Permite copiar a URL da imagem salva.
+*/
+
 import { useRef, useState } from "react"
 
 export default function PublicImageSaver({ lp }) {
@@ -8,19 +14,18 @@ export default function PublicImageSaver({ lp }) {
 
   const chooseFile = () => fileInputRef.current?.click()
 
+  // Modifica o nome do arquivo para algo mais natural
   const suggestName = (file) => {
     const base = (lp?.slug || lp?.id || "lp").toString().slice(0, 24)
     const stem = `hero-${base}`
     const ext = (file.name.split(".").pop() || "png").toLowerCase()
     return `${stem}.${ext}`
   }
-
+  
   const saveViaFSA = async (file) => {
-    // File System Access API flow
     if (!window.showDirectoryPicker) {
       throw new Error("API não suportada. Use Chrome/Edge e ative HTTPS/localhost.")
     }
-    // Ask user to pick the project public/ directory
     const dir = await window.showDirectoryPicker({
       id: "plp-public-folder",
       mode: "readwrite",
@@ -33,9 +38,9 @@ export default function PublicImageSaver({ lp }) {
     await writable.close()
     return `/${targetName}`
   }
-
+  // Fallback trigger para regular o download do arquivo
+  // para o usuário adicionar na pasta public
   const fallbackDownload = (file) => {
-    // Fallback: trigger a regular browser download so the user can move it to public/
     const a = document.createElement("a")
     a.href = URL.createObjectURL(file)
     a.download = suggestName(file)
@@ -46,6 +51,7 @@ export default function PublicImageSaver({ lp }) {
     return `/${a.download}`
   }
 
+  // Salva imagem na pasta public ou retorna erro ao não conseguir
   const onFileChange = async (e) => {
     const file = e.target.files?.[0]
     e.target.value = "" // reset input for next use
@@ -72,6 +78,7 @@ export default function PublicImageSaver({ lp }) {
     }
   }
 
+  // Componente responsável por copiar a URL da imagem selecionada
   const copyUrl = async () => {
     if (!savedPath) return
     try {
@@ -112,4 +119,6 @@ export default function PublicImageSaver({ lp }) {
     </div>
   )
 }
+
+
 

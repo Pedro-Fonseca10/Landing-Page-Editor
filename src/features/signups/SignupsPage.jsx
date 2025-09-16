@@ -1,8 +1,13 @@
+/*
+  Página de listagem de cadastros feitos via Landing Pages.
+*/
+
 import { useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import AppFooter from "../../components/AppFooter"
 import { Repo } from "../../lib/repo"
 
+// Componente de listagem de cadastros
 export default function SignupsPage() {
   const navigate = useNavigate()
   const [list, setList] = useState([])
@@ -14,23 +19,23 @@ export default function SignupsPage() {
   }
 
   useEffect(() => { reload() }, [])
-
+  
   const del = (id) => {
     Repo.remove("cadastros", id)
     reload()
   }
-
+  // Formata data ISO 
   const fmtDate = (iso) => {
     try {
       return new Date(iso).toLocaleString()
     } catch { return iso || "" }
   }
-
+  // Cria um dicionário de LPs por ID para acesso rápido
   const lpsById = useMemo(
     () => Object.fromEntries(lps.map(lp => [String(lp.id), lp])),
     [lps]
   )
-
+  // Renderiza a LP associada ao cadastro
   const renderLp = (s) => {
     const id = s.lp_id ?? s.lpId
     const lp = id ? lpsById[String(id)] : null
@@ -39,6 +44,7 @@ export default function SignupsPage() {
     return s.lp_slug || "—"
   }
 
+  //  Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">

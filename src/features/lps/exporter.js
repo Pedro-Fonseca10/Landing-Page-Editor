@@ -1,3 +1,9 @@
+/*
+  Exporta a landing page como um arquivo zip contendo HTML e CSS.
+  Usa a biblioteca JSZip para criar o zip e FileSaver.js para baixar o arquivo.
+  Ainda em implementação
+*/
+
 import JSZip from "jszip"
 import { saveAs } from "file-saver"
 

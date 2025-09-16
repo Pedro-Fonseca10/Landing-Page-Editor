@@ -1,3 +1,7 @@
+/*
+  Componente de formulário de captura de leads.
+*/
+
 import { useRef, useState } from "react"
 import { logEvent } from "../analytics/analytics"
 
