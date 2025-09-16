@@ -1,6 +1,5 @@
 // Conteúdo padrão do template SaaS (centralizado em 1 arquivo)
 // Segue a ideia do repo-base de manter o conteúdo em um arquivo único. 
-// Você pode editar tudo aqui sem mexer nos componentes.
 const data = {
   theme: "#0ea5e9",
   navbar: {

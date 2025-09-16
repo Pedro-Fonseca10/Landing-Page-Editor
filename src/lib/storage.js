@@ -1,3 +1,10 @@
+/*  
+  Local Storage para salvar e carregar dados
+  - usa prefixo 'plp:' para evitar conflitos
+  - funções: load(name, fallback), save(name, data)
+  - tratamento de erros ao carregar (JSON inválido, etc)
+*/
+
 const k = (name) => `plp:${name}`
 
 export const load = (name, fallback=[]) => {

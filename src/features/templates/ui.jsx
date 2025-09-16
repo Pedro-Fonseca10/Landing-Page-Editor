@@ -1,3 +1,7 @@
+/*
+  Funções gerais para facilitar construção dos componentes
+*/
+
 export function Section({ id, className="", children }) {
   return <section id={id} className={"py-12 " + className}>{children}</section>
 }

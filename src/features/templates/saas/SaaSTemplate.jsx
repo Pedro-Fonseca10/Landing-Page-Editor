@@ -1,3 +1,10 @@
+/*
+  Template SaaS para landing pages
+  - por padrão, usa dados de 'dataDefault' (import estático)
+  - quando recebe 'lp' com 'content', faz merge com os dados default
+  - permite personalização de cores (fundo e texto) via localStorage
+*/
+
 import { useMemo, useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import dataDefault from "./data"
