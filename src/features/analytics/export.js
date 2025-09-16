@@ -1,3 +1,7 @@
+/*
+  Funções para exportar dados analíticos em CSV e PDF.
+*/
+
 import { saveAs } from "file-saver"
 import jsPDF from "jspdf"
 import "jspdf-autotable"

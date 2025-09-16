@@ -207,23 +207,33 @@ export default function Checkout() {
                 <div className="grid gap-1.5 sm:grid-cols-3">
                   <div className="grid gap-1.5 sm:col-span-2">
                     <label className="text-sm text-slate-700 dark:text-slate-200">Escolha o plano</label>
-                    <select
-                      className="h-11 w-full rounded-lg border border-slate-300 bg-white dark:bg-slate-800 px-3 text-slate-600 dark:text-slate-300 appearance-none !bg-opacity-100"
-                      value={planName}
-                      onChange={(e) => {
-                        const name = e.target.value
-                        setPlanName(name)
-                        const found = plans.find(p => (p?.name || "") === name)
-                        const price = found ? parsePrice(found.price) : 0
-                        setBasePrice(price)
-                      }}
-                    >
-                      {plans.map((p) => (
-                        <option key={p?.name || "_"} value={p?.name || ""}>
-                          {(p?.name || "Plano")} — R$ {parsePrice(p?.price).toFixed(2)}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative inline-block w-full">
+                      <select
+                        className="h-11 w-full rounded-lg border border-slate-300 bg-white dark:bg-slate-800 px-3 pr-10 text-slate-600 dark:text-slate-300 appearance-none !bg-opacity-100"
+                        value={planName}
+                        onChange={(e) => {
+                          const name = e.target.value
+                          setPlanName(name)
+                          const found = plans.find(p => (p?.name || "") === name)
+                          const price = found ? parsePrice(found.price) : 0
+                          setBasePrice(price)
+                        }}
+                      >
+                        {plans.map((p) => (
+                          <option key={p?.name || "_"} value={p?.name || ""}>
+                            {(p?.name || "Plano")} — R$ {parsePrice(p?.price).toFixed(2)}
+                          </option>
+                        ))}
+                      </select>
+                      <svg
+                        className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70"
+                        viewBox="0 0 20 20"
+                        fill="#0ea5e9"
+                        aria-hidden="true"
+                      >
+                        <path d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 10.94l3.71-3.71a.75.75 0 1 1 1.06 1.06l-4.24 4.24a.75.75 0 0 1-1.06 0L5.21 8.29a.75.75 0 0 1 .02-1.08z"/>
+                      </svg>
+                    </div>
                   </div>
                   <div className="grid gap-1.5">
                     <label className="text-sm text-slate-700 dark:text-slate-200">Preço</label>

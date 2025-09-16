@@ -1,3 +1,9 @@
+/*
+  Funções para gerenciar sessão usando localStorage.
+  Gera novos IDs únicos conforme necessário.
+  Reinicia a sessão após 30 minutos de inatividade.
+*/
+
 const K_VISITOR = "plp:visitor_id"
 const K_SESSION = "plp:session_id"
 

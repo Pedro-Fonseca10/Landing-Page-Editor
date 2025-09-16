@@ -1,3 +1,8 @@
+/*
+  Funções para registrar e recuperar eventos analíticos.
+  Armazena eventos no localStorage com informações como tipo, timestamp, IDs de visitante/sessão, URL, parâmetros UTM e dados do dispositivo.
+*/
+
 import { getVisitorId, getSessionId } from "./session"
 
 const K_EVENTS = "plp:events"

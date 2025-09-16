@@ -1,3 +1,8 @@
+/*
+  Funções para carregar eventos e calcular métricas analíticas.
+  Inclui filtragem de eventos por intervalo de datas e agregação de métricas como visitantes, sessões, taxa de conversão, etc.
+*/
+
 import { getEvents } from "./analytics"
 
 const inRange = (ts, start, end) => {

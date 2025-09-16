@@ -1,3 +1,12 @@
+/*
+  Página de métricas/relatórios
+  - Seleção de landing page 
+  - Seleção de período 
+  - Cálculo de métricas (visitors, sessions, page views, ctr, conversions, conv rate, bounce rate)
+  - Tabela de canais (utm_source) com métricas por canal
+  - Exportar CSV  
+*/
+
 import { useEffect, useMemo, useState, useRef, Fragment } from "react"
 import { createPortal } from "react-dom"
 import { useNavigate } from "react-router-dom"
@@ -6,7 +15,10 @@ import { exportCSV, exportMetricsPDF } from "./export"
 import { Repo } from "../../lib/repo"
 import AppFooter from "../../components/AppFooter"
 
+// Formata número como porcentagem com 1 casa decimal
 function pct(x) { return (x * 100).toFixed(1) + "%" }
+
+// Formata data como "YYYY-MM-DD", parseia string "YYYY-MM-DD" e adiciona dias
 const fmt = (d) => {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -16,6 +28,7 @@ const fmt = (d) => {
 const parse = (s) => { const d = new Date(s); return isNaN(d) ? null : d }
 const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n)
 
+// Página principal de métricas
 export default function MetricsPage() {
   const navigate = useNavigate()
   const [start, setStart] = useState("")
@@ -23,12 +36,12 @@ export default function MetricsPage() {
   const [lps, setLps] = useState([])
   const [lpId, setLpId] = useState("")
 
-  // Load events for range; then filter by LP
+  // Carrega eventos e calcula métricas
   const events = useMemo(() => loadEventsInRange({ start, end }), [start, end])
   const filtered = useMemo(() => events.filter(e => lpId ? String(e.lp_id) === String(lpId) : false), [events, lpId])
   const m = useMemo(() => computeMetrics(filtered), [filtered])
 
-  // Defaults: start = ontem, end = hoje
+  // Inicializa período com ontem e hoje
   useEffect(() => {
     if (!start && !end) {
       const todayDate = new Date()
@@ -38,7 +51,7 @@ export default function MetricsPage() {
     }
   }, [start, end])
 
-  // Load LPs
+  // Carrega lista de LPs
   useEffect(() => { setLps(Repo.list("lps")) }, [])
 
   const period = start && end ? `${start} a ${end}` : ""
@@ -60,6 +73,7 @@ export default function MetricsPage() {
     }
   }
 
+  // Exportações
   const exportKpisCsv = () => {
     if (!lpId) return
     exportCSV(
@@ -88,7 +102,8 @@ export default function MetricsPage() {
   }
 
   const exportPdf = () => { if (lpId) exportMetricsPDF(`relatorio_${start}_${end}_${lpId}.pdf`, m, m.sources, period) }
-
+  
+  // -------------------------------------------------------------------------- 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900">
       <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -158,7 +173,8 @@ export default function MetricsPage() {
             </div>
           </div>
         </section>
-
+        
+        {/* KPIs principais */}
         <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Card title="Visitantes únicos" value={lpId ? m.visitors : '—'} />
           <Card title="Sessões" value={lpId ? m.sessions : '—'} />
@@ -175,6 +191,7 @@ export default function MetricsPage() {
             <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">Canais (utm_source)</h2>
             <span className="text-xs text-slate-500 dark:text-slate-400">Total: {lpId ? m.sources.length : 0}</span>
           </div>
+          {/* Tabela de canais */}
           <div className="overflow-auto rounded-lg border border-slate-200 dark:border-slate-800">
             <table className="min-w-[720px] w-full">
               <thead className="bg-slate-50 dark:bg-slate-800/40">
@@ -252,7 +269,6 @@ function DateInput({ id, value, onChange, min, max }) {
     'janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'
   ]
 
-  // Close on outside click, but keep panel interactions
   useEffect(() => {
     const onDocDown = (e) => {
       const a = anchorRef.current
@@ -266,14 +282,12 @@ function DateInput({ id, value, onChange, min, max }) {
     return () => document.removeEventListener('mousedown', onDocDown)
   }, [])
 
-  // Sync visible month with input value
   useEffect(() => {
     if (!value) return
     const d = parse(value)
     if (d) setMonth(new Date(d.getFullYear(), d.getMonth(), 1))
   }, [value])
 
-  // Build calendar grid (Mon-first)
   const startOfMonth = new Date(month.getFullYear(), month.getMonth(), 1)
   const endOfMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0)
   const firstWeekday = (startOfMonth.getDay() + 6) % 7
@@ -302,7 +316,6 @@ function DateInput({ id, value, onChange, min, max }) {
     return true
   }
 
-  // Position as portal-fixed popover
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const computePos = () => {
     if (!anchorRef.current) return
