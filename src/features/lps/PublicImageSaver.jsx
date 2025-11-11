@@ -4,90 +4,92 @@
   Permite copiar a URL da imagem salva.
 */
 
-import { useRef, useState } from "react"
+import { useRef, useState } from 'react';
 
 export default function PublicImageSaver({ lp }) {
-  const fileInputRef = useRef(null)
-  const [status, setStatus] = useState("")
-  const [savedPath, setSavedPath] = useState("")
-  const [saving, setSaving] = useState(false)
+  const fileInputRef = useRef(null);
+  const [status, setStatus] = useState('');
+  const [savedPath, setSavedPath] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const chooseFile = () => fileInputRef.current?.click()
+  const chooseFile = () => fileInputRef.current?.click();
 
   // Modifica o nome do arquivo para algo mais natural
   const suggestName = (file) => {
-    const base = (lp?.slug || lp?.id || "lp").toString().slice(0, 24)
-    const stem = `hero-${base}`
-    const ext = (file.name.split(".").pop() || "png").toLowerCase()
-    return `${stem}.${ext}`
-  }
-  
+    const base = (lp?.slug || lp?.id || 'lp').toString().slice(0, 24);
+    const stem = `hero-${base}`;
+    const ext = (file.name.split('.').pop() || 'png').toLowerCase();
+    return `${stem}.${ext}`;
+  };
+
   const saveViaFSA = async (file) => {
     if (!window.showDirectoryPicker) {
-      throw new Error("API não suportada. Use Chrome/Edge e ative HTTPS/localhost.")
+      throw new Error(
+        'API não suportada. Use Chrome/Edge e ative HTTPS/localhost.',
+      );
     }
     const dir = await window.showDirectoryPicker({
-      id: "plp-public-folder",
-      mode: "readwrite",
-      startIn: "documents",
-    })
-    const targetName = suggestName(file)
-    const handle = await dir.getFileHandle(targetName, { create: true })
-    const writable = await handle.createWritable()
-    await writable.write(file)
-    await writable.close()
-    return `/${targetName}`
-  }
+      id: 'plp-public-folder',
+      mode: 'readwrite',
+      startIn: 'documents',
+    });
+    const targetName = suggestName(file);
+    const handle = await dir.getFileHandle(targetName, { create: true });
+    const writable = await handle.createWritable();
+    await writable.write(file);
+    await writable.close();
+    return `/${targetName}`;
+  };
   // Fallback trigger para regular o download do arquivo
   // para o usuário adicionar na pasta public
   const fallbackDownload = (file) => {
-    const a = document.createElement("a")
-    a.href = URL.createObjectURL(file)
-    a.download = suggestName(file)
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(a.href)
-    return `/${a.download}`
-  }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = suggestName(file);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    return `/${a.download}`;
+  };
 
   // Salva imagem na pasta public ou retorna erro ao não conseguir
   const onFileChange = async (e) => {
-    const file = e.target.files?.[0]
-    e.target.value = "" // reset input for next use
-    if (!file) return
-    setSaving(true)
-    setStatus("")
-    setSavedPath("")
+    const file = e.target.files?.[0];
+    e.target.value = ''; // reset input for next use
+    if (!file) return;
+    setSaving(true);
+    setStatus('');
+    setSavedPath('');
     try {
-      let path = ""
+      let path = '';
       try {
-        path = await saveViaFSA(file)
-        setStatus("Imagem salva na pasta public.")
+        path = await saveViaFSA(file);
+        setStatus('Imagem salva na pasta public.');
       } catch (err) {
-        console.warn("FSA indisponível, usando download de arquivo.", err)
-        path = fallbackDownload(file)
-        setStatus("Baixei o arquivo. Mova-o para a pasta public.")
+        console.warn('FSA indisponível, usando download de arquivo.', err);
+        path = fallbackDownload(file);
+        setStatus('Baixei o arquivo. Mova-o para a pasta public.');
       }
-      setSavedPath(path)
+      setSavedPath(path);
     } catch (err) {
-      console.error(err)
-      setStatus("Erro ao salvar imagem.")
+      console.error(err);
+      setStatus('Erro ao salvar imagem.');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   // Componente responsável por copiar a URL da imagem selecionada
   const copyUrl = async () => {
-    if (!savedPath) return
+    if (!savedPath) return;
     try {
-      await navigator.clipboard.writeText(savedPath)
-      setStatus("URL copiada para a área de transferência.")
+      await navigator.clipboard.writeText(savedPath);
+      setStatus('URL copiada para a área de transferência.');
     } catch {
-      setStatus("Não foi possível copiar a URL.")
+      setStatus('Não foi possível copiar a URL.');
     }
-  }
+  };
 
   return (
     <div className="flex items-center gap-2">
@@ -105,20 +107,27 @@ export default function PublicImageSaver({ lp }) {
         disabled={saving}
         title="Upload Imagem"
       >
-        {saving ? "Salvando..." : "Upload Imagem"}
+        {saving ? 'Salvando...' : 'Upload Imagem'}
       </button>
       {savedPath && (
         <div className="flex items-center gap-2 text-sm">
-          <code className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">{savedPath}</code>
-          <button className="border rounded px-2 py-1" type="button" onClick={copyUrl}>Copiar URL</button>
+          <code className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800">
+            {savedPath}
+          </code>
+          <button
+            className="border rounded px-2 py-1"
+            type="button"
+            onClick={copyUrl}
+          >
+            Copiar URL
+          </button>
         </div>
       )}
       {status && (
-        <span className="text-xs text-slate-600 dark:text-slate-300">{status}</span>
+        <span className="text-xs text-slate-600 dark:text-slate-300">
+          {status}
+        </span>
       )}
     </div>
-  )
+  );
 }
-
-
-

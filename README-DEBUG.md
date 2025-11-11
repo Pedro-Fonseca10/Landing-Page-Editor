@@ -16,21 +16,21 @@ O problema estava sendo causado pelo **React.StrictMode** no arquivo `src/main.j
 ## Soluções Implementadas
 
 ### 1. ✅ Remoção do React.StrictMode
+
 ```jsx
 // ANTES (problemático)
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AppRouter />
   </React.StrictMode>,
-)
+);
 
 // DEPOIS (corrigido)
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <AppRouter />
-)
+ReactDOM.createRoot(document.getElementById('root')).render(<AppRouter />);
 ```
 
 ### 2. ✅ Melhorias na Função de Exclusão
+
 - Validação rigorosa do ID recebido
 - Verificação de existência da landing page
 - Detecção de IDs duplicados
@@ -38,11 +38,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 - Logs detalhados para debug
 
 ### 3. ✅ Melhorias na Função de Persistência
+
 - Validação de tipo de dados
 - Filtragem de dados corrompidos
 - Logs detalhados para debug
 
 ### 4. ✅ Melhorias no useEffect
+
 - Tratamento de erros robusto
 - Validação de dados carregados
 - Filtragem de landing pages inválidas

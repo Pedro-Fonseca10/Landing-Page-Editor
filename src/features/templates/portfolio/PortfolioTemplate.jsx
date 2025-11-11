@@ -1,9 +1,9 @@
-import dataDefault from "./data"
-import { Section, Container } from "../ui.jsx"
-import LeadForm from "../../lps/LeadForm"
+import dataDefault from './data';
+import { Section, Container } from '../ui.jsx';
+import LeadForm from '../../lps/LeadForm';
 
 export default function PortfolioTemplate({ lp }) {
-  const c = { ...dataDefault, ...(lp.content || {}) }
+  const c = { ...dataDefault, ...(lp.content || {}) };
   return (
     <div className="bg-white min-h-screen">
       <Section id="hero" className="bg-gray-50">
@@ -17,7 +17,7 @@ export default function PortfolioTemplate({ lp }) {
         <Container>
           <h2 className="text-2xl font-semibold mb-4">Serviços</h2>
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-            {c.services.map((s,i)=>(
+            {c.services.map((s, i) => (
               <div key={i} className="border rounded-xl p-4">
                 <div className="font-medium">{s.title}</div>
                 <div className="text-sm text-gray-600">{s.text}</div>
@@ -31,7 +31,7 @@ export default function PortfolioTemplate({ lp }) {
         <Container>
           <h2 className="text-2xl font-semibold mb-4">Portfólio</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {c.showcase.map((w,i)=>(
+            {c.showcase.map((w, i) => (
               <div key={i} className="border rounded-xl p-4">
                 <div className="font-medium">{w.name}</div>
                 <div className="text-sm text-gray-600">{w.role}</div>
@@ -49,8 +49,12 @@ export default function PortfolioTemplate({ lp }) {
       </Section>
 
       <footer className="border-t">
-        <Container><div className="h-16 flex items-center text-sm text-gray-600">{c.footer.note}</div></Container>
+        <Container>
+          <div className="h-16 flex items-center text-sm text-gray-600">
+            {c.footer.note}
+          </div>
+        </Container>
       </footer>
     </div>
-  )
+  );
 }

@@ -1,9 +1,9 @@
-import dataDefault from "./data"
-import { Section, Container } from "../ui.jsx"
-import LeadForm from "../../lps/LeadForm"
+import dataDefault from './data';
+import { Section, Container } from '../ui.jsx';
+import LeadForm from '../../lps/LeadForm';
 
 export default function WaitlistTemplate({ lp }) {
-  const c = { ...dataDefault, ...(lp.content || {}) }
+  const c = { ...dataDefault, ...(lp.content || {}) };
   return (
     <div className="bg-white min-h-screen">
       <Section id="hero" className="bg-gray-50">
@@ -16,7 +16,9 @@ export default function WaitlistTemplate({ lp }) {
       <Section id="benefits">
         <Container>
           <ul className="grid gap-3 list-disc pl-6">
-            {c.bullets.map((b,i)=><li key={i}>{b}</li>)}
+            {c.bullets.map((b, i) => (
+              <li key={i}>{b}</li>
+            ))}
           </ul>
         </Container>
       </Section>
@@ -29,8 +31,12 @@ export default function WaitlistTemplate({ lp }) {
       </Section>
 
       <footer className="border-t">
-        <Container><div className="h-16 flex items-center text-sm text-gray-600">{c.footer.note}</div></Container>
+        <Container>
+          <div className="h-16 flex items-center text-sm text-gray-600">
+            {c.footer.note}
+          </div>
+        </Container>
       </footer>
     </div>
-  )
+  );
 }
