@@ -5,13 +5,13 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Repo } from '../../lib/repo';
 import { defaultContent } from './defaultContent';
 import saasDefault from '../templates/saas/data';
 import d2cDefault from '../templates/d2c/data';
 import eventoDefault from '../templates/evento/data';
 import waitlistDefault from '../templates/waitlist/data';
 import AppFooter from '../../components/AppFooter';
+import { fetchLandingPage, updateLandingPage } from './lpsService';
 
 // Componente do editor de LP
 export default function LandingPageEditor() {
@@ -21,26 +21,57 @@ export default function LandingPageEditor() {
   const [content, setContent] = useState(defaultContent);
   // Estado local para edição de texto livre
   const [featuresTextByIndex, setFeaturesTextByIndex] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
-  // Carrega a LP do repositório
-  useEffect(() => {
-    const found = Repo.get('lps', id);
-    if (!found) return nav('/lps');
-    setLp(found);
-    if (found.id_template === 'saas') {
+  const applyContentFromLp = (found) => {
+    if (!found) return;
+    if (
+      found.id_template === 'saas' ||
+      found.id_template === 'd2c' ||
+      found.id_template === 'evento' ||
+      found.id_template === 'waitlist'
+    ) {
       setContent(found.content ?? {});
-      setFeaturesTextByIndex({});
-    } else if (found.id_template === 'd2c') {
-      setContent(found.content ?? {});
-      setFeaturesTextByIndex({});
-    } else if (found.id_template === 'evento') {
-      setContent(found.content ?? {});
-      setFeaturesTextByIndex({});
     } else {
       setContent(found.content ?? defaultContent);
-      setFeaturesTextByIndex({});
     }
-  }, [id, nav]);
+    setFeaturesTextByIndex({});
+  };
+
+  // Carrega a LP a partir do Supabase
+  useEffect(() => {
+    let active = true;
+
+    async function load() {
+      setLoading(true);
+      setLoadError('');
+      try {
+        const found = await fetchLandingPage(id);
+        if (!active) return;
+        if (!found) {
+          setLoadError('Landing page não encontrada.');
+          setLp(null);
+          return;
+        }
+        setLp(found);
+        applyContentFromLp(found);
+      } catch (err) {
+        if (active) {
+          setLoadError(err?.message || 'Falha ao carregar a landing page.');
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    load();
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   const onChange = (k, v) => setContent((prev) => ({ ...prev, [k]: v }));
 
@@ -108,10 +139,36 @@ export default function LandingPageEditor() {
     if (Array.isArray(existing)) return [...existing];
     return cloneArray(snapshot);
   };
-  const onSave = () => {
-    Repo.update('lps', id, { content });
-    nav(`/preview/${id}`);
+  const onSave = async () => {
+    setSaveError('');
+    setSaving(true);
+    try {
+      await updateLandingPage(id, { content });
+      nav(`/preview/${id}`);
+    } catch (err) {
+      setSaveError(err?.message || 'Falha ao salvar a landing page.');
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return <div className="p-6">Carregando editor...</div>;
+  }
+
+  if (loadError) {
+    return (
+      <div className="p-6 space-y-4">
+        <p className="text-red-600">{loadError}</p>
+        <button
+          type="button"
+          className="rounded border border-slate-300 px-3 py-2 text-sm"
+          onClick={() => nav('/lps')}
+        >
+          Voltar para listagem
+        </button>
+      </div>
+    );
+  }
 
   if (!lp) return null;
 
@@ -990,12 +1047,19 @@ export default function LandingPageEditor() {
               </div>
             </section>
 
+            {saveError && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                {saveError}
+              </div>
+            )}
+
             <div className="flex justify-end">
               <button
                 className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
                 onClick={onSave}
+                disabled={saving}
               >
-                Salvar e visualizar
+                {saving ? 'Salvando...' : 'Salvar e visualizar'}
               </button>
             </div>
           </div>
@@ -1918,12 +1982,18 @@ export default function LandingPageEditor() {
                 </div>
               </section>
 
+              {saveError && (
+                <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                  {saveError}
+                </div>
+              )}
               <div className="flex justify-end">
                 <button
                   className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
                   onClick={onSave}
+                  disabled={saving}
                 >
-                  Salvar e visualizar
+                  {saving ? 'Salvando...' : 'Salvar e visualizar'}
                 </button>
               </div>
             </div>
@@ -3291,12 +3361,18 @@ export default function LandingPageEditor() {
                 </div>
               </section>
 
+              {saveError && (
+                <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                  {saveError}
+                </div>
+              )}
               <div className="flex justify-end">
                 <button
                   className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
                   onClick={onSave}
+                  disabled={saving}
                 >
-                  Salvar e visualizar
+                  {saving ? 'Salvando...' : 'Salvar e visualizar'}
                 </button>
               </div>
             </div>
@@ -4598,12 +4674,18 @@ export default function LandingPageEditor() {
                 </div>
               </section>
 
+              {saveError && (
+                <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                  {saveError}
+                </div>
+              )}
               <div className="flex justify-end">
                 <button
                   className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
                   onClick={onSave}
+                  disabled={saving}
                 >
-                  Salvar e visualizar
+                  {saving ? 'Salvando...' : 'Salvar e visualizar'}
                 </button>
               </div>
             </div>
@@ -4675,12 +4757,18 @@ export default function LandingPageEditor() {
                 onChange={(e) => onChange('headline', e.target.value)}
               />
             </div>
+            {saveError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-200">
+                {saveError}
+              </div>
+            )}
             <div className="flex justify-end">
               <button
                 className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
                 onClick={onSave}
+                disabled={saving}
               >
-                Salvar e visualizar
+                {saving ? 'Salvando...' : 'Salvar e visualizar'}
               </button>
             </div>
           </div>

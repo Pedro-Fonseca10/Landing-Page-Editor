@@ -2,13 +2,18 @@
   Página de gerenciamento de landing pages.
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppFooter from '../../components/AppFooter';
 import { Repo } from '../../lib/repo';
 import { TEMPLATES } from '../templates/catalog';
 import { exportLandingPageZip } from './exporter';
-import { generateUniqueId } from '../../lib/uid';
+import {
+  listLandingPages,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage,
+} from './lpsService';
 
 // Página de gerenciamento de landing pages
 export default function LandingPagesPage() {
@@ -23,21 +28,33 @@ export default function LandingPagesPage() {
   });
   const [error, setError] = useState(null);
   const [renameState, setRenameState] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [remoteError, setRemoteError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   // Atualização constante das lps
-  const reload = () => {
-    const clientesData = Repo.list('clientes');
-    const lpsData = Repo.list('lps');
-    setClientes(clientesData);
-    setList(lpsData);
-  };
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setRemoteError('');
+    try {
+      const clientesData = Repo.list('clientes');
+      const lpsData = await listLandingPages();
+      setClientes(clientesData);
+      setList(lpsData);
+    } catch (err) {
+      setRemoteError(
+        err?.message || 'Não foi possível carregar as landing pages.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   useEffect(() => {
     reload();
-  }, []);
+  }, [reload]);
 
   const startRename = (lp) => {
-    const current = Repo.get('lps', lp.id);
-    const currentTitle = current?.titulo ?? lp.titulo ?? '';
+    const currentTitle = lp?.titulo ?? '';
     setRenameState({ id: lp.id, error: null, initialValue: currentTitle });
   };
 
@@ -45,7 +62,7 @@ export default function LandingPagesPage() {
     setRenameState(null);
   };
 
-  const handleRenameSubmit = (e) => {
+  const handleRenameSubmit = async (e) => {
     e.preventDefault();
     if (!renameState?.id) return;
 
@@ -64,15 +81,28 @@ export default function LandingPagesPage() {
       return;
     }
 
-    Repo.update('lps', renameState.id, { titulo: nextValue });
-    setRenameState(null);
-    reload();
+    try {
+      await updateLandingPage(renameState.id, { titulo: nextValue });
+      setRenameState(null);
+      reload();
+    } catch (err) {
+      setRenameState((prev) =>
+        prev
+          ? {
+              ...prev,
+              error:
+                err?.message || 'Não foi possível renomear a landing page',
+            }
+          : prev,
+      );
+    }
   };
 
   // Preencher os dados da landing page a ser criada
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setRemoteError('');
 
     if (!form.titulo.trim()) {
       setError('Por favor, insira um título para a landing page');
@@ -83,22 +113,38 @@ export default function LandingPagesPage() {
       return;
     }
 
-    if (form.id) {
-      Repo.update('lps', form.id, form);
-    } else {
-      const existingIds = list.map((lp) => lp.id);
-      const newId = generateUniqueId(existingIds);
-      const novaLP = { ...form, id: newId, content: undefined };
-      Repo.add('lps', novaLP);
-    }
+    const payload = {
+      titulo: form.titulo,
+      id_cliente: form.id_cliente,
+      id_template: form.id_template,
+    };
 
-    setForm({ id: null, titulo: '', id_cliente: '', id_template: 'saas' });
-    reload();
+    setSubmitting(true);
+    try {
+      if (form.id) {
+        await updateLandingPage(form.id, payload);
+      } else {
+        await createLandingPage(payload);
+      }
+      setForm({ id: null, titulo: '', id_cliente: '', id_template: 'saas' });
+      await reload();
+    } catch (err) {
+      setRemoteError(err?.message || 'Não foi possível salvar a landing page.');
+    } finally {
+      setSubmitting(false);
+    }
   };
   // Deletar uma landing page
-  const delOne = (lpId) => {
-    Repo.remove('lps', lpId);
-    reload();
+  const delOne = async (lpId) => {
+    setRemoteError('');
+    try {
+      await deleteLandingPage(lpId);
+      await reload();
+    } catch (err) {
+      setRemoteError(
+        err?.message || 'Não foi possível excluir a landing page.',
+      );
+    }
   };
 
   const clientesById = useMemo(
@@ -143,6 +189,27 @@ export default function LandingPagesPage() {
             </button>
           </div>
         </header>
+
+        {remoteError && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            <svg
+              className="mt-0.5 h-5 w-5 flex-shrink-0"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.5a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 8a1 1 0 100-2 1 1 0 000 2z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{remoteError}</span>
+          </div>
+        )}
 
         {error && (
           <div
@@ -256,8 +323,15 @@ export default function LandingPagesPage() {
               </div>
 
               <div className="flex gap-2">
-                <button className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40">
-                  {form.id ? 'Salvar' : 'Adicionar'}
+                <button
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
+                  disabled={submitting}
+                >
+                  {submitting
+                    ? 'Salvando...'
+                    : form.id
+                      ? 'Salvar'
+                      : 'Adicionar'}
                 </button>
                 {form.id && (
                   <button
@@ -291,17 +365,23 @@ export default function LandingPagesPage() {
             </div>
 
             <div className="mt-4 grid gap-3">
-              {list.length === 0 && (
+              {loading && (
+                <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                  Carregando landing pages...
+                </div>
+              )}
+              {!loading && list.length === 0 && (
                 <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                   Sem landing pages ainda.
                 </div>
               )}
 
-              {list.map((lp) => (
-                <div
-                  key={lp.id}
-                  className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                >
+              {!loading &&
+                list.map((lp) => (
+                  <div
+                    key={lp.id}
+                    className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                     <div className="w-full flex-1">
                       <div className="flex items-start gap-3 lg:items-center">
@@ -489,7 +569,7 @@ export default function LandingPagesPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))}
             </div>
           </section>
         </div>

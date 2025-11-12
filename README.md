@@ -31,6 +31,20 @@ src/main.jsx ──▶ src/routes/AppRouter.jsx
 
 Essa estrutura favorece a evolução incremental por domínio de negócio, reuso de componentes transversais e clareza na responsabilização de cada módulo.
 
+## ⚙️ Configuração de Ambiente
+
+1. Crie um arquivo `.env.local` na raiz do projeto (já está no `.gitignore`).
+2. Preencha com as credenciais públicas do seu projeto Supabase:
+
+   ```bash
+   VITE_SUPABASE_URL=<URL do projeto>
+   VITE_SUPABASE_PUBLISHABLE_KEY=<chave pública>
+   ```
+
+3. Reinicie o servidor do Vite sempre que alterar essas variáveis.
+
+O frontend agora consulta as landing pages diretamente do Supabase; caso as variáveis não estejam configuradas, o carregamento é interrompido com um aviso explícito.
+
 ## 🎯 Principais Funcionalidades
 
 - **CRUD de clientes e landing pages**.

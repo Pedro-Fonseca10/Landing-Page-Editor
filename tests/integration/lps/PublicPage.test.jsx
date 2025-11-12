@@ -28,19 +28,21 @@ describe('PublicPage (integration)', () => {
     localStorage.clear();
   });
 
-  it('exibe mensagem padrão quando não existe', () => {
+  it('exibe mensagem padrão quando não existe', async () => {
     renderPublic('inexistente');
-    expect(screen.getByText('Página não encontrada.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Página não encontrada.'),
+    ).toBeInTheDocument();
   });
 
-  it('renderiza TemplateRenderer quando encontra LP', () => {
+  it('renderiza TemplateRenderer quando encontra LP', async () => {
     localStorage.setItem(
       'plp:lps',
       JSON.stringify([{ slug: 'landing-1', title: 'Landing 1' }]),
     );
     renderPublic('landing-1');
 
-    expect(screen.getByTestId('lp-render')).toHaveTextContent(
+    expect(await screen.findByTestId('lp-render')).toHaveTextContent(
       'Renderizando Landing 1',
     );
   });
