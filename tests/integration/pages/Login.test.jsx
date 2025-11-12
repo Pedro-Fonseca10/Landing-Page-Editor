@@ -1,3 +1,8 @@
+/*
+  Testes de integração da página de Login.
+  Confirmam logout forçado ao carregar, feedback de erro quando o login falha e redirecionamento ao dashboard em sucesso.
+*/
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';

@@ -1,3 +1,8 @@
+/*
+  Testes unitários para o wrapper Repo de CRUD em localStorage.
+  Exercita listagem, busca, inserção, atualização e remoção garantindo cópias imutáveis.
+*/
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Repo } from '../../../src/lib/repo';
 

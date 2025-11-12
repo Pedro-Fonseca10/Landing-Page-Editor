@@ -22,6 +22,7 @@ export default function LandingPagesPage() {
     id_template: 'saas',
   });
   const [error, setError] = useState(null);
+  const [renameState, setRenameState] = useState(null);
 
   // Atualização constante das lps
   const reload = () => {
@@ -33,6 +34,40 @@ export default function LandingPagesPage() {
   useEffect(() => {
     reload();
   }, []);
+
+  const startRename = (lp) => {
+    const current = Repo.get('lps', lp.id);
+    const currentTitle = current?.titulo ?? lp.titulo ?? '';
+    setRenameState({ id: lp.id, error: null, initialValue: currentTitle });
+  };
+
+  const cancelRename = () => {
+    setRenameState(null);
+  };
+
+  const handleRenameSubmit = (e) => {
+    e.preventDefault();
+    if (!renameState?.id) return;
+
+    const data = new FormData(e.currentTarget);
+    const nextValue = String(data.get('renameTitulo') ?? '').trim();
+
+    if (!nextValue) {
+      setRenameState((prev) =>
+        prev
+          ? {
+              ...prev,
+              error: 'Por favor, insira um novo nome para a landing page',
+            }
+          : prev,
+      );
+      return;
+    }
+
+    Repo.update('lps', renameState.id, { titulo: nextValue });
+    setRenameState(null);
+    reload();
+  };
 
   // Preencher os dados da landing page a ser criada
   const onSubmit = (e) => {
@@ -91,9 +126,9 @@ export default function LandingPagesPage() {
               onClick={() => navigate('/dashboard')}
               type="button"
             >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
+                      <svg
+                        className="h-4 w-4"
+                        viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
@@ -267,9 +302,9 @@ export default function LandingPagesPage() {
                   key={lp.id}
                   className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="w-full flex-1">
+                      <div className="flex items-start gap-3 lg:items-center">
                         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-violet-100 text-violet-700 ring-1 ring-inset ring-violet-200 dark:bg-violet-900/40 dark:text-violet-300 dark:ring-violet-800">
                           <svg
                             className="h-4 w-4"
@@ -286,8 +321,51 @@ export default function LandingPagesPage() {
                             <path d="M7 21h10" />
                           </svg>
                         </div>
-                        <div className="font-medium text-slate-900 dark:text-slate-100">
-                          {lp.titulo}
+                        <div className="flex-1 min-w-0">
+                          {renameState?.id === lp.id ? (
+                            <form
+                              key={`rename-${lp.id}`}
+                              onSubmit={handleRenameSubmit}
+                              className="flex flex-col gap-3 lg:flex-row lg:items-center"
+                            >
+                              <input
+                                autoFocus
+                                aria-label="Editar nome da landing page"
+                                name="renameTitulo"
+                                className="w-full flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 transition focus:border-sky-400 focus:ring-2 focus:ring-sky-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:focus:border-sky-500 dark:focus:ring-sky-700/40"
+                                defaultValue={renameState.initialValue ?? lp.titulo ?? ''}
+                                onInput={() =>
+                                  setRenameState((prev) =>
+                                    prev ? { ...prev, error: null } : prev,
+                                  )
+                                }
+                              />
+                              <div className="flex flex-wrap gap-2 lg:justify-end">
+                                <button
+                                  type="submit"
+                                  className="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 dark:bg-sky-500 dark:hover:bg-sky-400 dark:focus:ring-sky-700/40"
+                                >
+                                  Salvar
+                                </button>
+                                <button
+                                  type="button"
+                                  className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-slate-600/40"
+                                  onClick={cancelRename}
+                                >
+                                  Cancelar
+                                </button>
+                              </div>
+                            </form>
+                          ) : (
+                            <div className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-800 dark:text-slate-100">
+                              <span className="block truncate">{lp.titulo}</span>
+                            </div>
+                          )}
+                          {renameState?.id === lp.id && renameState?.error ? (
+                            <p className="mt-1 text-xs text-red-600 dark:text-red-400">
+                              {renameState.error}
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                       <div className="mt-1 text-sm text-slate-600 dark:text-slate-300">
@@ -300,7 +378,31 @@ export default function LandingPagesPage() {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex w-full flex-wrap gap-2 lg:w-auto lg:justify-end">
+                      {renameState?.id === lp.id ? null : (
+                        <button
+                          className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-sky-700/40"
+                          type="button"
+                          onClick={() => startRename(lp)}
+                        >
+                          <svg
+                            className="h-4 w-4"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <path d="M5 20h14" />
+                            <path d="M9 20l3-16 3 16" />
+                            <path d="M8 12h8" />
+                          </svg>
+                          Renomear
+                        </button>
+                      )}
+
                       <Link
                         className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-sky-700/40"
                         to={`/lps/${lp.id}/edit`}

@@ -1,3 +1,8 @@
+/*
+  Testes unitários para as funções load/save do storage local.
+  Garante fallback padrão, serialização correta e logs de erro em JSON inválido.
+*/
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { load, save } from '../../../src/lib/storage';
 

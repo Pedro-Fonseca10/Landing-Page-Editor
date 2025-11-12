@@ -1,3 +1,8 @@
+/*
+  Testes unitários do contexto AuthProvider.
+  Cobrem login por papel, erro em credenciais inválidas, registro de novos usuários e logout.
+*/
+
 import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { AuthProvider } from '../../../src/features/auth/AuthProvider';

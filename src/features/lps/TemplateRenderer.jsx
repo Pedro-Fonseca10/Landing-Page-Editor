@@ -7,9 +7,7 @@ import { logEvent } from '../analytics/analytics';
 import SaaSTemplate from '../templates/saas/SaaSTemplate';
 import EventoTemplate from '../templates/evento/EventoTemplate';
 import D2CTemplate from '../templates/d2c/D2CTemplate';
-import PortfolioTemplate from '../templates/portfolio/PortfolioTemplate';
 import WaitlistTemplate from '../templates/waitlist/WaitlistTemplate';
-import PlansTemplate from '../templates/plans/PlansTemplate';
 import SignupButton from './SignupButton';
 
 export default function TemplateRenderer({ lp }) {
@@ -40,24 +38,10 @@ export default function TemplateRenderer({ lp }) {
           <SignupButton lpId={lp.id} lpSlug={lp.slug} />
         </>
       );
-    case 'portfolio':
-      return (
-        <>
-          <PortfolioTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
-        </>
-      );
     case 'waitlist':
       return (
         <>
           <WaitlistTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
-        </>
-      );
-    case 'plans':
-      return (
-        <>
-          <PlansTemplate lp={lp} />
           <SignupButton lpId={lp.id} lpSlug={lp.slug} />
         </>
       );

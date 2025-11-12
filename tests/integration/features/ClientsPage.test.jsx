@@ -1,3 +1,8 @@
+/*
+  Testes de integração da página de clientes.
+  Cobrem estado vazio, leitura de clientes persistidos e fluxo de criação com validação de formulário.
+*/
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';

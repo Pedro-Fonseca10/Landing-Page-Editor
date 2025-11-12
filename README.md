@@ -109,9 +109,16 @@ npm run test
 | Unit        | `tests/unit/auth/AuthProvider.test.jsx`            | login com múltiplos perfis, erros e ciclo de logout                            |
 | Unit        | `tests/unit/lib/storage.test.js`                   | serialização no `localStorage`, fallback seguro e tratamento de JSON inválido  |
 | Unit        | `tests/unit/lib/repo.test.js`                      | CRUD do repositório em memória com garantia de imutabilidade                   |
+| Unit        | `tests/unit/lib/uid.test.js`                       | geração de IDs, validação de unicidade e reprocessamento em colisões           |
+| Unit        | `tests/unit/features/orders/orders.test.js`        | criação de pedidos, atualização de status e busca por ID                       |
+| Unit        | `tests/unit/features/analytics/session.test.js`    | persistência do visitante e renovação automática da sessão                     |
+| Unit        | `tests/unit/features/lps/public.test.js`           | normalização de slugs e busca de LP públicas armazenadas                       |
 | Integration | `tests/integration/routes/ProtectedRoute.test.jsx` | redirecionamento automático e bloqueio por role                                |
 | Integration | `tests/integration/pages/Login.test.jsx`           | efeito de logout inicial, feedback de erro e navegação pós-login               |
 | Integration | `tests/integration/features/ClientsPage.test.jsx`  | carregamento inicial, validação do formulário e persistência de novos clientes |
+| Integration | `tests/integration/features/LandingPagesPage.test.jsx` | estados vazios, leitura de LP existentes, validação e operações de CRUD    |
+| Integration | `tests/integration/payments/PaymentCallback.test.jsx` | fluxo de retorno do gateway, atualização de status e registro de conversões |
+| Integration | `tests/integration/lps/PublicPage.test.jsx`        | renderização de templates públicos e fallback quando o slug não existe         |
 
 O setup global informado em `vite.config.js` garante os matchers de `@testing-library/jest-dom` para todas as suítes.
 

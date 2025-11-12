@@ -10,9 +10,7 @@ import { saveAs } from 'file-saver';
 import saasDefault from '../templates/saas/data';
 import eventoDefault from '../templates/evento/data';
 import d2cDefault from '../templates/d2c/data';
-import portfolioDefault from '../templates/portfolio/data';
 import waitlistDefault from '../templates/waitlist/data';
-import plansDefault from '../templates/plans/data';
 
 // Utilitários
 const BASE_CSS = `
@@ -337,30 +335,6 @@ a {
   margin-right: 8px;
   color: var(--accent, #0ea5e9);
 }
-.lp-table-wrapper {
-  overflow-x: auto;
-  border-radius: 16px;
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  background: #ffffff;
-}
-.lp-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 720px;
-}
-.lp-table th {
-  text-align: left;
-  font-size: 0.9rem;
-  font-weight: 600;
-  padding: 16px 20px;
-  background: rgba(15, 23, 42, 0.03);
-}
-.lp-table td {
-  padding: 16px 20px;
-  border-top: 1px solid rgba(15, 23, 42, 0.08);
-  font-size: 0.95rem;
-  color: rgba(15, 23, 42, 0.75);
-}
 .lp-form {
   display: grid;
   gap: 16px;
@@ -433,9 +407,7 @@ const TEMPLATE_BUILDERS = {
   saas: buildSaasExport,
   evento: buildEventoExport,
   d2c: buildD2CExport,
-  portfolio: buildPortfolioExport,
   waitlist: buildWaitlistExport,
-  plans: buildPlansExport,
 };
 
 // Construção do zip garantindo que
@@ -859,101 +831,250 @@ function buildEventoExport(lp) {
 function buildD2CExport(lp) {
   const source = lp.content || {};
   const base = d2cDefault || {};
-  const accent = safeColor(source.theme ?? base.theme, '#ef4444');
-  const product = { ...(base.product || {}), ...(source.product || {}) };
-  const footerNote = source.footer?.note ?? base.footer?.note ?? '';
+  const mergedTheme = { ...(base.theme || {}), ...(source.theme || {}) };
+  const accent = safeColor(mergedTheme.accent ?? mergedTheme.primary, '#f97316');
+  const textColor = safeColor(
+    mergedTheme.text ?? mergedTheme.primary,
+    '#0f172a',
+  );
+  const backgroundColor = safeColor(
+    mergedTheme.background,
+    '#fff7ed',
+  );
+  const mutedColor = safeColor(mergedTheme.muted, '#fef3c7');
 
-  const bullets = pickArray(product.bullets, base.product?.bullets);
-  const productImage = isNonEmptyString(product.img)
-    ? `<div class="lp-hero-media"><img src="${escapeAttr(product.img)}" alt="${escapeAttr(product.name || 'Produto')}" /></div>`
+  const hero = { ...(base.hero || {}), ...(source.hero || {}) };
+  const heroBullets = pickArray(hero.bullets, base.hero?.bullets);
+  const heroStats = pickArray(hero.stats, base.hero?.stats);
+  const heroImage = isNonEmptyString(hero.image)
+    ? `<div class="lp-hero-media"><img src="${escapeAttr(hero.image)}" alt="${escapeAttr(hero.title || lp.titulo || 'Produto')}" /></div>`
     : '';
 
-  const sections = [];
-
-  sections.push(`
-<section class="lp-hero">
-  <div class="lp-container lp-hero-inner">
-    <div class="lp-hero-text">
-      <h1>${escapeHtml(product.name || lp.titulo || 'Produto')}</h1>
-      ${product.tagline ? `<p class="lp-lead">${escapeHtml(product.tagline)}</p>` : ''}
-      ${bullets.length ? `<ul class="lp-list">${bullets.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : ''}
-      <div class="lp-hero-actions">
-        <div class="lp-price">${escapeHtml(product.price || '')}</div>
-        ${product.ctaText ? `<a class="lp-button" href="${escapeAttr(product.ctaHref || '#comprar')}">${escapeHtml(product.ctaText)}</a>` : ''}
-      </div>
-    </div>
-    ${productImage}
-  </div>
-</section>`);
-
-  if (footerNote) {
-    sections.push(`
-<footer class="lp-footer">
-  <div class="lp-container">${escapeHtml(footerNote)}</div>
-</footer>`);
-  }
-
-  return {
-    body: sections.join('\n'),
-    title: product.name || lp.titulo || 'Produto',
-    description: product.tagline || '',
-    accentColor: accent,
+  const highlights = pickArray(source.highlights, base.highlights);
+  const lifestyle = { ...(base.lifestyle || {}), ...(source.lifestyle || {}) };
+  const lifestyleBullets = pickArray(lifestyle.bullets, base.lifestyle?.bullets);
+  const bundles = pickArray(source.bundles, base.bundles);
+  const testimonials = pickArray(source.testimonials, base.testimonials);
+  const guarantee = { ...(base.guarantee || {}), ...(source.guarantee || {}) };
+  const guaranteeBullets = pickArray(guarantee.bullets, base.guarantee?.bullets);
+  const faq = pickArray(source.faq, base.faq);
+  const socialProof = {
+    ...(base.socialProof || {}),
+    ...(source.socialProof || {}),
   };
-}
-
-// Constrói o HTML do template Portfolio
-function buildPortfolioExport(lp) {
-  const source = lp.content || {};
-  const base = portfolioDefault || {};
-  const accent = safeColor(source.theme ?? base.theme, '#22c55e');
-  const hero = { ...(base.hero || {}), ...(source.hero || {}) };
-  const services = pickArray(source.services, base.services);
-  const showcase = pickArray(source.showcase, base.showcase);
+  const socialLogos = pickArray(socialProof.logos, base.socialProof?.logos);
   const footerNote = source.footer?.note ?? base.footer?.note ?? '';
 
   const sections = [];
 
   sections.push(`
-<section class="lp-hero">
+<section class="lp-hero" style="background:${backgroundColor}">
   <div class="lp-container lp-hero-inner">
     <div class="lp-hero-text">
-      <h1>${escapeHtml(hero.title || lp.titulo || 'Portfolio')}</h1>
-      ${hero.subtitle ? `<p class="lp-lead">${escapeHtml(hero.subtitle)}</p>` : ''}
+      ${hero.label ? `<span class="lp-meta">${escapeHtml(hero.label)}</span>` : ''}
+      <h1>${escapeHtml(hero.title || lp.titulo || 'Produto D2C')}</h1>
+      ${hero.description ? `<p class="lp-lead">${escapeHtml(hero.description)}</p>` : ''}
+      ${
+        heroBullets.length
+          ? `<ul class="lp-list">${heroBullets
+              .map((item) => `<li>${escapeHtml(item)}</li>`)
+              .join('')}</ul>`
+          : ''
+      }
+      <div class="lp-price-card">
+        <div class="lp-price">${escapeHtml(hero.price || '')}</div>
+        ${
+          hero.oldPrice
+            ? `<div class="lp-price-old">${escapeHtml(hero.oldPrice)}</div>`
+            : ''
+        }
+        ${hero.shipping ? `<p>${escapeHtml(hero.shipping)}</p>` : ''}
+      </div>
+      <div class="lp-hero-actions">
+        ${
+          hero.ctaPrimary?.label
+            ? `<a class="lp-button" href="${escapeAttr(
+                hero.ctaPrimary.href || '#comprar',
+              )}">${escapeHtml(hero.ctaPrimary.label)}</a>`
+            : ''
+        }
+        ${
+          hero.ctaSecondary?.label
+            ? `<a class="lp-button ghost" href="${escapeAttr(
+                hero.ctaSecondary.href || '#detalhes',
+              )}">${escapeHtml(hero.ctaSecondary.label)}</a>`
+            : ''
+        }
+      </div>
+      ${
+        heroStats.length
+          ? `<div class="lp-grid lp-grid-2 lp-hero-stats">
+          ${heroStats
+            .map(
+              (stat) => `<div>
+              <div class="lp-stat-value">${escapeHtml(stat?.value || '')}</div>
+              <p class="lp-stat-label">${escapeHtml(stat?.label || '')}</p>
+            </div>`,
+            )
+            .join('')}
+        </div>`
+          : ''
+      }
     </div>
+    ${heroImage}
   </div>
 </section>`);
 
-  if (services.length > 0) {
+  if (socialLogos.length) {
     sections.push(`
-<section class="lp-section lp-section-muted">
+<section class="lp-section lp-section-muted" style="background:${mutedColor}">
   <div class="lp-container">
-    <h2>Servicos</h2>
+    <p class="lp-meta">${escapeHtml(socialProof.badge || 'Visto em')}</p>
+    <div class="lp-logos">
+      ${socialLogos.map((logo) => `<span>${escapeHtml(logo)}</span>`).join('')}
+    </div>
+    ${socialProof.text ? `<p class="lp-lead">${escapeHtml(socialProof.text)}</p>` : ''}
+  </div>
+</section>`);
+  }
+
+  if (highlights.length) {
+    sections.push(`
+<section class="lp-section">
+  <div class="lp-container">
+    <h2>Benefícios que fazem diferença</h2>
     <div class="lp-grid lp-grid-3">
-      ${services.map((service) => `<div class="lp-card"><h3>${escapeHtml(service?.title || 'Servico')}</h3><p>${escapeHtml(service?.text || 'Detalhe do servico')}</p></div>`).join('')}
+      ${highlights
+        .map(
+          (item) => `<div class="lp-card">
+        <div class="lp-icon">${escapeHtml(item?.icon || '✨')}</div>
+        <h3>${escapeHtml(item?.title || 'Benefício')}</h3>
+        <p>${escapeHtml(item?.text || '')}</p>
+      </div>`,
+        )
+        .join('')}
     </div>
   </div>
 </section>`);
   }
 
-  if (showcase.length > 0) {
+  if (lifestyle.title || lifestyle.image) {
+    sections.push(`
+<section class="lp-section lp-section-muted" style="background:${mutedColor}">
+  <div class="lp-container lp-grid lp-grid-2 lp-grid-center">
+    <div>
+      <h2>${escapeHtml(lifestyle.title || 'Para todos os momentos')}</h2>
+      <p class="lp-lead">${escapeHtml(lifestyle.description || '')}</p>
+      ${
+        lifestyleBullets.length
+          ? `<ul class="lp-list">${lifestyleBullets
+              .map((item) => `<li>${escapeHtml(item)}</li>`)
+              .join('')}</ul>`
+          : ''
+      }
+    </div>
+    ${
+      isNonEmptyString(lifestyle.image)
+        ? `<div class="lp-media"><img src="${escapeAttr(
+            lifestyle.image,
+          )}" alt="${escapeAttr(lifestyle.title || 'Lifestyle')}" /></div>`
+        : ''
+    }
+  </div>
+</section>`);
+  }
+
+  if (bundles.length) {
     sections.push(`
 <section class="lp-section">
   <div class="lp-container">
-    <h2>Projetos</h2>
-    <div class="lp-grid lp-grid-2">
-      ${showcase.map((item) => `<div class="lp-card"><h3>${escapeHtml(item?.name || 'Projeto')}</h3><p>${escapeHtml(item?.role || 'Resultado')}</p></div>`).join('')}
+    <h2>Escolha seu kit</h2>
+    <div class="lp-grid lp-grid-3">
+      ${bundles
+        .map((bundle, index) => {
+          const benefits = pickArray(
+            bundle?.benefits,
+            base.bundles?.[index]?.benefits,
+          );
+          return `<div class="lp-card">
+        ${
+          bundle.badge
+            ? `<span class="lp-badge">${escapeHtml(bundle.badge)}</span>`
+            : ''
+        }
+        <h3>${escapeHtml(bundle.name || 'Kit')}</h3>
+        <p>${escapeHtml(bundle.description || '')}</p>
+        <div class="lp-price">${escapeHtml(bundle.price || '')}</div>
+        ${
+          bundle.oldPrice
+            ? `<div class="lp-price-old">${escapeHtml(bundle.oldPrice)}</div>`
+            : ''
+        }
+        <ul class="lp-list">
+          ${benefits
+            .map((benefit) => `<li>${escapeHtml(benefit)}</li>`)
+            .join('')}
+        </ul>
+      </div>`;
+        })
+        .join('')}
     </div>
   </div>
 </section>`);
   }
 
-  sections.push(`
-<section class="lp-section">
+  if (testimonials.length) {
+    sections.push(`
+<section class="lp-section lp-section-muted" style="background:${mutedColor}">
   <div class="lp-container">
-    <h2>Fale comigo</h2>
-    ${renderLeadForm({ submitLabel: 'Enviar mensagem' })}
+    <h2>O que nossos clientes dizem</h2>
+    <div class="lp-grid lp-grid-3">
+      ${testimonials
+        .map(
+          (dep) => `<div class="lp-card">
+        <p class="lp-quote">“${escapeHtml(dep?.quote || '')}”</p>
+        <div class="lp-author">${escapeHtml(dep?.name || 'Cliente')}</div>
+        <p class="lp-subtle">${escapeHtml(dep?.location || '')}</p>
+      </div>`,
+        )
+        .join('')}
+    </div>
   </div>
 </section>`);
+  }
+
+  if (guarantee.title || faq.length) {
+    sections.push(`
+<section class="lp-section">
+  <div class="lp-container lp-grid lp-grid-2 lp-grid-gap-lg">
+    <div>
+      <h2>${escapeHtml(guarantee.title || 'Compra segura')}</h2>
+      <p class="lp-lead">${escapeHtml(guarantee.description || '')}</p>
+      ${
+        guaranteeBullets.length
+          ? `<ul class="lp-list">${guaranteeBullets
+              .map((item) => `<li>${escapeHtml(item)}</li>`)
+              .join('')}</ul>`
+          : ''
+      }
+    </div>
+    <div>
+      ${
+        faq.length
+          ? faq
+              .map(
+                (item) => `<details class="lp-faq">
+            <summary>${escapeHtml(item?.question || 'Pergunta')}</summary>
+            <p>${escapeHtml(item?.answer || '')}</p>
+          </details>`,
+              )
+              .join('')
+          : ''
+      }
+    </div>
+  </div>
+</section>`);
+  }
 
   if (footerNote) {
     sections.push(`
@@ -962,10 +1083,16 @@ function buildPortfolioExport(lp) {
 </footer>`);
   }
 
+  const themedBody = [
+    `<div class="lp-wrapper" style="background:${backgroundColor};color:${textColor};">`,
+    ...sections,
+    '</div>',
+  ].join('\n');
+
   return {
-    body: sections.join('\n'),
-    title: hero.title || lp.titulo || 'Portfolio',
-    description: hero.subtitle || '',
+    body: themedBody,
+    title: hero.title || lp.titulo || 'Produto D2C',
+    description: hero.description || '',
     accentColor: accent,
   };
 }
@@ -1031,84 +1158,6 @@ function buildWaitlistExport(lp) {
   return {
     body: sections.join('\n'),
     title: hero.title || lp.titulo || 'Lista de espera',
-    description: hero.subtitle || '',
-    accentColor: accent,
-  };
-}
-
-// Constrói o HTML do template Plans
-function buildPlansExport(lp) {
-  const source = lp.content || {};
-  const base = plansDefault || {};
-  const accent = safeColor(source.theme ?? base.theme, '#f59e0b');
-  const hero = { ...(base.hero || {}), ...(source.hero || {}) };
-  const features = pickArray(source.features, base.features);
-  const plans = pickArray(source.plans, base.plans);
-  const footerNote = source.footer?.note ?? base.footer?.note ?? '';
-
-  const sections = [];
-
-  sections.push(`
-<section class="lp-hero">
-  <div class="lp-container lp-hero-inner">
-    <div class="lp-hero-text">
-      <h1>${escapeHtml(hero.title || lp.titulo || 'Planos')}</h1>
-      ${hero.subtitle ? `<p class="lp-lead">${escapeHtml(hero.subtitle)}</p>` : ''}
-    </div>
-  </div>
-</section>`);
-
-  if (features.length && plans.length) {
-    const headerRow = plans
-      .map(
-        (plan) =>
-          `<th>${escapeHtml(plan?.name || 'Plano')}<div style="font-weight:400;font-size:0.8rem;color:rgba(15,23,42,0.6);margin-top:6px;">${escapeHtml(plan?.price || '')}</div></th>`,
-      )
-      .join('');
-    const rows = features
-      .map((featureName, rowIndex) => {
-        const values = plans
-          .map(
-            (plan) => `<td>${escapeHtml(plan?.values?.[rowIndex] || '-')}</td>`,
-          )
-          .join('');
-        return `<tr><td style="font-weight:600;color:#0f172a;">${escapeHtml(featureName)}</td>${values}</tr>`;
-      })
-      .join('\n');
-
-    const actions = plans
-      .map(
-        (plan) =>
-          `<td><a class="lp-button" href="${escapeAttr(plan?.href || '#')}">Escolher ${escapeHtml(plan?.name || '')}</a></td>`,
-      )
-      .join('');
-
-    sections.push(`
-<section class="lp-section lp-section-muted">
-  <div class="lp-container">
-    <div class="lp-table-wrapper">
-      <table class="lp-table">
-        <thead><tr><th></th>${headerRow}</tr></thead>
-        <tbody>
-          ${rows}
-          <tr><td></td>${actions}</tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>`);
-  }
-
-  if (footerNote) {
-    sections.push(`
-<footer class="lp-footer">
-  <div class="lp-container">${escapeHtml(footerNote)}</div>
-</footer>`);
-  }
-
-  return {
-    body: sections.join('\n'),
-    title: hero.title || lp.titulo || 'Planos',
     description: hero.subtitle || '',
     accentColor: accent,
   };

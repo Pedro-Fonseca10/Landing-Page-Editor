@@ -1,3 +1,8 @@
+/*
+  Testes de integração do ProtectedRoute.
+  Validam redirecionamento para login, acesso autenticado e bloqueio quando a role exigida não corresponde.
+*/
+
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';

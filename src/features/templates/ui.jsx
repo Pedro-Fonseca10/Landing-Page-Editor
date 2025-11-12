@@ -14,13 +14,13 @@ export function Container({ className = '', children }) {
     <div className={'max-w-5xl mx-auto px-4 ' + className}>{children}</div>
   );
 }
-export function Button({ style, href, onClick, children }) {
+export function Button({ style, className = '', href, onClick, children }) {
   const Cmp = href ? 'a' : 'button';
   return (
     <Cmp
       href={href}
       onClick={onClick}
-      className="inline-block px-4 py-2 rounded border"
+      className={`inline-block rounded border px-4 py-2 transition ${className}`}
       style={style}
     >
       {children}
