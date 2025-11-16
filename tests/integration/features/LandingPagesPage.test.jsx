@@ -7,13 +7,28 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import LandingPagesPage from '../../../src/features/lps/LandingPagesPage';
+import {
+  listLandingPages,
+  createLandingPage,
+  updateLandingPage,
+  deleteLandingPage,
+} from '../../../src/features/lps/lpsService';
+import { listClients } from '../../../src/features/clients/clientsService';
 
 vi.mock('../../../src/features/lps/exporter', () => ({
   exportLandingPageZip: vi.fn(),
 }));
 
-const LPS_KEY = 'plp:lps';
-const CLIENTS_KEY = 'plp:clientes';
+vi.mock('../../../src/features/lps/lpsService', () => ({
+  listLandingPages: vi.fn(),
+  createLandingPage: vi.fn(),
+  updateLandingPage: vi.fn(),
+  deleteLandingPage: vi.fn(),
+}));
+
+vi.mock('../../../src/features/clients/clientsService', () => ({
+  listClients: vi.fn(),
+}));
 
 const renderPage = () =>
   render(
@@ -24,28 +39,34 @@ const renderPage = () =>
 
 describe('LandingPagesPage (integration)', () => {
   beforeEach(() => {
-    localStorage.clear();
     vi.clearAllMocks();
+    listLandingPages.mockReset();
+    createLandingPage.mockReset();
+    updateLandingPage.mockReset();
+    deleteLandingPage.mockReset();
+    listClients.mockReset();
+    listLandingPages.mockResolvedValue([]);
+    listClients.mockResolvedValue([]);
+    createLandingPage.mockResolvedValue({ id: 'lp-mock' });
+    updateLandingPage.mockResolvedValue({ id: 'lp-mock' });
+    deleteLandingPage.mockResolvedValue(true);
   });
 
   it('mostra mensagem vazia e total 0 quando não há landing pages', async () => {
+    listClients.mockResolvedValueOnce([]);
+    listLandingPages.mockResolvedValueOnce([]);
     renderPage();
 
     expect(await screen.findByText('Sem landing pages ainda.')).toBeInTheDocument();
     expect(await screen.findByText('Total: 0')).toBeInTheDocument();
+    expect(listLandingPages).toHaveBeenCalledTimes(1);
   });
 
   it('renderiza lista com cliente vinculado e nome do template', async () => {
-    localStorage.setItem(
-      CLIENTS_KEY,
-      JSON.stringify([{ id: 'c1', nome: 'Cliente XPTO' }]),
-    );
-    localStorage.setItem(
-      LPS_KEY,
-      JSON.stringify([
-        { id: 'lp-1', titulo: 'LP Demo', id_cliente: 'c1', id_template: 'evento' },
-      ]),
-    );
+    listClients.mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }]);
+    listLandingPages.mockResolvedValueOnce([
+      { id: 'lp-1', titulo: 'LP Demo', id_cliente: 'c1', id_template: 'evento' },
+    ]);
 
     renderPage();
 
@@ -56,12 +77,10 @@ describe('LandingPagesPage (integration)', () => {
   });
 
   it('valida título e cliente obrigatórios antes de salvar', async () => {
-    localStorage.setItem(
-      CLIENTS_KEY,
-      JSON.stringify([{ id: 'c1', nome: 'Cliente XPTO' }]),
-    );
+    listClients.mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }]);
 
     renderPage();
+    await screen.findByText('Cliente XPTO');
 
     const submitButton = screen.getByRole('button', { name: 'Adicionar' });
     fireEvent.click(submitButton);
@@ -79,48 +98,63 @@ describe('LandingPagesPage (integration)', () => {
   });
 
   it('cria nova landing page e reseta o formulário', async () => {
-    localStorage.setItem(
-      CLIENTS_KEY,
-      JSON.stringify([{ id: 'c1', nome: 'Cliente XPTO' }]),
-    );
-    localStorage.setItem(LPS_KEY, JSON.stringify([]));
+    listClients
+      .mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }])
+      .mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }]);
+    listLandingPages
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 'lp-1',
+          titulo: 'LP Nova',
+          id_cliente: 'c1',
+          id_template: 'evento',
+        },
+      ]);
+    createLandingPage.mockResolvedValueOnce({
+      id: 'lp-1',
+      titulo: 'LP Nova',
+      id_cliente: 'c1',
+      id_template: 'evento',
+    });
 
     renderPage();
+    await screen.findByText('Cliente XPTO');
 
     fireEvent.change(screen.getByLabelText('Título'), {
       target: { value: 'LP Nova' },
     });
-    await screen.findByText('Cliente XPTO');
     fireEvent.change(screen.getByLabelText('Cliente'), {
       target: { value: 'c1' },
     });
     fireEvent.change(screen.getByLabelText('Template'), {
-      target: { value: 'plans' },
+      target: { value: 'evento' },
     });
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar' }));
 
+    await waitFor(() =>
+      expect(createLandingPage).toHaveBeenCalledWith({
+        titulo: 'LP Nova',
+        id_cliente: 'c1',
+        id_template: 'evento',
+      }),
+    );
     expect(await screen.findByText('Total: 1')).toBeInTheDocument();
-    const stored = JSON.parse(localStorage.getItem(LPS_KEY));
-    expect(stored[0]).toMatchObject({
-      titulo: 'LP Nova',
-      id_cliente: 'c1',
-      id_template: 'plans',
-    });
+    expect(screen.getByText('LP Nova')).toBeInTheDocument();
     expect(screen.getByLabelText('Título')).toHaveValue('');
     expect(screen.getByLabelText('Cliente')).toHaveValue('');
   });
 
   it('permite excluir uma landing page existente', async () => {
-    localStorage.setItem(
-      CLIENTS_KEY,
-      JSON.stringify([{ id: 'c1', nome: 'Cliente XPTO' }]),
-    );
-    localStorage.setItem(
-      LPS_KEY,
-      JSON.stringify([
+    listClients
+      .mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }])
+      .mockResolvedValueOnce([{ id: 'c1', nome: 'Cliente XPTO' }]);
+    listLandingPages
+      .mockResolvedValueOnce([
         { id: 'lp-1', titulo: 'LP Demo', id_cliente: 'c1', id_template: 'saas' },
-      ]),
-    );
+      ])
+      .mockResolvedValueOnce([]);
+    deleteLandingPage.mockResolvedValueOnce(true);
 
     renderPage();
     expect(await screen.findByText('LP Demo')).toBeInTheDocument();
@@ -128,9 +162,8 @@ describe('LandingPagesPage (integration)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Excluir' }));
 
     await waitFor(() =>
-      expect(screen.getByText('Sem landing pages ainda.')).toBeInTheDocument(),
+      expect(deleteLandingPage).toHaveBeenCalledWith('lp-1'),
     );
-    const stored = JSON.parse(localStorage.getItem(LPS_KEY) ?? '[]');
-    expect(stored).toHaveLength(0);
+    expect(await screen.findByText('Sem landing pages ainda.')).toBeInTheDocument();
   });
 });
