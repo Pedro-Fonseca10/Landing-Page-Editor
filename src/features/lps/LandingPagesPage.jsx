@@ -5,7 +5,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AppFooter from '../../components/AppFooter';
-import { Repo } from '../../lib/repo';
 import { TEMPLATES } from '../templates/catalog';
 import { exportLandingPageZip } from './exporter';
 import {
@@ -14,6 +13,7 @@ import {
   updateLandingPage,
   deleteLandingPage,
 } from './lpsService';
+import { listClients } from '../clients/clientsService';
 
 // Página de gerenciamento de landing pages
 export default function LandingPagesPage() {
@@ -37,8 +37,10 @@ export default function LandingPagesPage() {
     setLoading(true);
     setRemoteError('');
     try {
-      const clientesData = Repo.list('clientes');
-      const lpsData = await listLandingPages();
+      const [clientesData, lpsData] = await Promise.all([
+        listClients(),
+        listLandingPages(),
+      ]);
       setClientes(clientesData);
       setList(lpsData);
     } catch (err) {

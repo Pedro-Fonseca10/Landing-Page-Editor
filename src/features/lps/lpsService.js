@@ -1,4 +1,5 @@
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/api/supabaseClient';
+import { ensureApiSuccess, withFallback } from '../../lib/api/remoteHelpers';
 import { makeSlug } from './public';
 import { Repo } from '../../lib/repo';
 
@@ -11,63 +12,56 @@ const mapRowToLp = (row) => ({
   content: row?.content ?? {},
 });
 
-const ensureOk = (error, context) => {
-  if (error) {
-    const message =
-      typeof error.message === 'string'
-        ? error.message
-        : 'Erro ao comunicar com Supabase';
-    throw new Error(context ? `${context}: ${message}` : message);
-  }
-};
-
 const fallbackList = () => Repo.list('lps');
 const fallbackGet = (id) => Repo.get('lps', id);
 const fallbackFindBySlug = (slug) =>
   fallbackList().find((lp) => lp.slug === slug) ?? null;
 
 export async function listLandingPages() {
-  try {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .order('created_at', { ascending: false });
-    ensureOk(error, 'Falha ao listar landing pages');
-    return (data || []).map(mapRowToLp);
-  } catch (err) {
-    console.warn('Supabase indisponível, retornando dados locais.', err);
-    return fallbackList();
-  }
+  return withFallback(
+    async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select('*')
+        .order('created_at', { ascending: false });
+      ensureApiSuccess(error, 'Falha ao listar landing pages');
+      return (data || []).map(mapRowToLp);
+    },
+    () => fallbackList(),
+    'Supabase indisponível, retornando dados locais de landing pages.',
+  );
 }
 
 export async function fetchLandingPage(id) {
-  try {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('id', id)
-      .maybeSingle();
-    ensureOk(error, 'Falha ao carregar a landing page');
-    return data ? mapRowToLp(data) : null;
-  } catch (err) {
-    console.warn('Supabase indisponível, buscando LP localmente.', err);
-    return fallbackGet(id);
-  }
+  return withFallback(
+    async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select('*')
+        .eq('id', id)
+        .maybeSingle();
+      ensureApiSuccess(error, 'Falha ao carregar a landing page');
+      return data ? mapRowToLp(data) : null;
+    },
+    () => fallbackGet(id),
+    'Supabase indisponível, buscando LP localmente.',
+  );
 }
 
 export async function fetchLandingPageBySlug(slug) {
-  try {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .select('*')
-      .eq('slug', slug)
-      .maybeSingle();
-    ensureOk(error, 'Falha ao carregar a landing page pública');
-    return data ? mapRowToLp(data) : null;
-  } catch (err) {
-    console.warn('Supabase indisponível, consultando slug local.', err);
-    return fallbackFindBySlug(slug);
-  }
+  return withFallback(
+    async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+      ensureApiSuccess(error, 'Falha ao carregar a landing page pública');
+      return data ? mapRowToLp(data) : null;
+    },
+    () => fallbackFindBySlug(slug),
+    'Supabase indisponível, consultando slug local.',
+  );
 }
 
 export async function createLandingPage(payload) {
@@ -89,23 +83,26 @@ export async function createLandingPage(payload) {
     content,
   };
 
-  try {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .insert(insertPayload)
-      .select()
-      .single();
+  return withFallback(
+    async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .insert(insertPayload)
+        .select()
+        .single();
 
-    ensureOk(error, 'Falha ao criar a landing page');
-    return mapRowToLp(data);
-  } catch (err) {
-    console.warn('Supabase indisponível, salvando LP localmente.', err);
-    const fallbackRecord = {
-      ...insertPayload,
-      id: insertPayload.id ?? slugSeed,
-    };
-    return Repo.add('lps', fallbackRecord);
-  }
+      ensureApiSuccess(error, 'Falha ao criar a landing page');
+      return mapRowToLp(data);
+    },
+    () => {
+      const fallbackRecord = {
+        ...insertPayload,
+        id: insertPayload.id ?? slugSeed,
+      };
+      return Repo.add('lps', fallbackRecord);
+    },
+    'Supabase indisponível, salvando LP localmente.',
+  );
 }
 
 export async function updateLandingPage(id, patch) {
@@ -118,29 +115,37 @@ export async function updateLandingPage(id, patch) {
 
   if (Object.keys(next).length === 0) return fetchLandingPage(id);
 
-  try {
-    const { data, error } = await supabase
-      .from(TABLE)
-      .update(next)
-      .eq('id', id)
-      .select()
-      .single();
+  return withFallback(
+    async () => {
+      const { data, error } = await supabase
+        .from(TABLE)
+        .update(next)
+        .eq('id', id)
+        .select()
+        .single();
 
-    ensureOk(error, 'Falha ao atualizar a landing page');
-    return mapRowToLp(data);
-  } catch (err) {
-    console.warn('Supabase indisponível, atualizando LP localmente.', err);
-    Repo.update('lps', id, next);
-    return fallbackGet(id);
-  }
+      ensureApiSuccess(error, 'Falha ao atualizar a landing page');
+      return mapRowToLp(data);
+    },
+    () => {
+      Repo.update('lps', id, next);
+      return fallbackGet(id);
+    },
+    'Supabase indisponível, atualizando LP localmente.',
+  );
 }
 
 export async function deleteLandingPage(id) {
-  try {
-    const { error } = await supabase.from(TABLE).delete().eq('id', id);
-    ensureOk(error, 'Falha ao excluir a landing page');
-  } catch (err) {
-    console.warn('Supabase indisponível, excluindo LP localmente.', err);
-    Repo.remove('lps', id);
-  }
+  return withFallback(
+    async () => {
+      const { error } = await supabase.from(TABLE).delete().eq('id', id);
+      ensureApiSuccess(error, 'Falha ao excluir a landing page');
+      return true;
+    },
+    () => {
+      Repo.remove('lps', id);
+      return true;
+    },
+    'Supabase indisponível, excluindo LP localmente.',
+  );
 }

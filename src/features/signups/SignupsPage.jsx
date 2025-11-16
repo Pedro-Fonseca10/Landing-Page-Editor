@@ -2,29 +2,51 @@
   Página de listagem de cadastros feitos via Landing Pages.
 */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../../components/AppFooter';
-import { Repo } from '../../lib/repo';
+import { listSignups, deleteSignup } from './signupsService';
+import { listLandingPages } from '../lps/lpsService';
 
 // Componente de listagem de cadastros
 export default function SignupsPage() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [lps, setLps] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [remoteError, setRemoteError] = useState('');
 
-  const reload = () => {
-    setList(Repo.list('cadastros'));
-    setLps(Repo.list('lps'));
-  };
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setRemoteError('');
+    try {
+      const [signupsData, lpsData] = await Promise.all([
+        listSignups(),
+        listLandingPages(),
+      ]);
+      setList(signupsData);
+      setLps(lpsData);
+    } catch (err) {
+      setRemoteError(
+        err?.message || 'Não foi possível carregar os cadastrados.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     reload();
-  }, []);
+  }, [reload]);
 
-  const del = (id) => {
-    Repo.remove('cadastros', id);
-    reload();
+  const del = async (id) => {
+    setRemoteError('');
+    try {
+      await deleteSignup(id);
+      await reload();
+    } catch (err) {
+      setRemoteError(err?.message || 'Não foi possível remover o cadastro.');
+    }
   };
   // Formata data ISO
   const fmtDate = (iso) => {
@@ -85,16 +107,26 @@ export default function SignupsPage() {
           </div>
         </header>
 
+        {remoteError && (
+          <div
+            role="alert"
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200"
+          >
+            {remoteError}
+          </div>
+        )}
+
         <section className="rounded-2xl border border-slate-200 bg-white/70 p-6 shadow-md backdrop-blur dark:border-slate-800 dark:bg-slate-900/60">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-medium text-slate-900 dark:text-slate-100">
               Lista de cadastrados
             </h2>
             <button
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
               onClick={reload}
+              disabled={loading}
             >
-              Recarregar
+              {loading ? 'Atualizando...' : 'Recarregar'}
             </button>
           </div>
 
@@ -118,7 +150,16 @@ export default function SignupsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-800 dark:bg-slate-900">
-                {list.length === 0 ? (
+                {loading ? (
+                  <tr>
+                    <td
+                      className="px-4 py-4 text-slate-600 dark:text-slate-300"
+                      colSpan={5}
+                    >
+                      Carregando cadastros...
+                    </td>
+                  </tr>
+                ) : list.length === 0 ? (
                   <tr>
                     <td
                       className="px-4 py-4 text-slate-600 dark:text-slate-300"
@@ -144,8 +185,8 @@ export default function SignupsPage() {
                       </td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {fmtDate(s.createdAt)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
+                     </td>
+                     <td className="px-4 py-3 text-right">
                         <button
                           className="inline-flex items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-3 py-1 text-xs text-red-700 shadow-sm transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-300 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200 dark:hover:bg-red-900/40 dark:focus:ring-red-900/60"
                           onClick={() => del(s.id)}

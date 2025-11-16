@@ -91,7 +91,10 @@ export default function D2CTemplate({ lp }) {
                 {heroBullets.length > 0 && (
                   <ul className="grid gap-2 text-sm md:grid-cols-2">
                     {heroBullets.map((item, index) => (
-                      <li key={item || index} className="flex items-start gap-2">
+                      <li
+                        key={item || index}
+                        className="flex items-start gap-2"
+                      >
                         <span
                           className="mt-1 h-1.5 w-1.5 rounded-full"
                           style={{ background: palette.accent }}
@@ -260,7 +263,11 @@ export default function D2CTemplate({ lp }) {
       )}
 
       {(lifestyle.title || lifestyle.image) && (
-        <Section id="lifestyle" className="bg-slate-50/60" style={{ background: palette.muted }}>
+        <Section
+          id="lifestyle"
+          className="bg-slate-50/60"
+          style={{ background: palette.muted }}
+        >
           <Container className="grid gap-10 lg:grid-cols-2 lg:items-center">
             <div className="space-y-4">
               <p className="text-xs font-semibold uppercase tracking-[0.25em]">
@@ -339,15 +346,15 @@ export default function D2CTemplate({ lp }) {
                     {asArray(bundle.benefits).map((benefit, idx) => (
                       <li key={benefit || idx} className="flex gap-2">
                         <span style={{ color: palette.accent }}>✓</span>
-                        <span style={{ color: palette.subtle }}>
-                          {benefit}
-                        </span>
+                        <span style={{ color: palette.subtle }}>{benefit}</span>
                       </li>
                     ))}
                   </ul>
                   <Button
                     href={bundle.href || hero.ctaPrimary?.href || '#comprar'}
-                    onClick={() => handleCta('bundle', { bundle_id: bundle.id })}
+                    onClick={() =>
+                      handleCta('bundle', { bundle_id: bundle.id })
+                    }
                     className="mt-6 border-transparent text-white shadow-lg"
                     style={{
                       background: palette.accent,
@@ -364,7 +371,11 @@ export default function D2CTemplate({ lp }) {
       )}
 
       {testimonials.length > 0 && (
-        <Section id="reviews" className="bg-slate-50/80" style={{ background: palette.muted }}>
+        <Section
+          id="reviews"
+          className="bg-slate-50/80"
+          style={{ background: palette.muted }}
+        >
           <Container>
             <div className="space-y-3 text-center">
               <p className="text-xs font-semibold uppercase tracking-[0.25em]">
@@ -383,7 +394,10 @@ export default function D2CTemplate({ lp }) {
                   key={dep?.name || index}
                   className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm"
                 >
-                  <div className="flex items-center gap-2" style={{ color: palette.accent }}>
+                  <div
+                    className="flex items-center gap-2"
+                    style={{ color: palette.accent }}
+                  >
                     {'★'.repeat(dep.rating || 5)}
                   </div>
                   <p className="mt-4 text-sm" style={{ color: palette.subtle }}>
@@ -430,7 +444,10 @@ export default function D2CTemplate({ lp }) {
                       <summary className="cursor-pointer text-sm font-semibold">
                         {item?.question}
                       </summary>
-                      <p className="mt-2 text-sm" style={{ color: palette.subtle }}>
+                      <p
+                        className="mt-2 text-sm"
+                        style={{ color: palette.subtle }}
+                      >
                         {item?.answer}
                       </p>
                     </details>
@@ -452,7 +469,10 @@ export default function D2CTemplate({ lp }) {
 
       <footer className="border-t border-slate-100 bg-white">
         <Container>
-          <div className="py-8 text-center text-sm" style={{ color: palette.subtle }}>
+          <div
+            className="py-8 text-center text-sm"
+            style={{ color: palette.subtle }}
+          >
             {content.footer?.note ||
               `© ${new Date().getFullYear()} - Produto D2C`}
           </div>

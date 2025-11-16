@@ -2,57 +2,87 @@
   Roda a página de clientes, onde é possível adicionar, editar e excluir clientes.
 */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AppFooter from '../../components/AppFooter';
-import { load, save } from '../../lib/storage';
-import { uid } from '../../lib/uid';
+import {
+  listClients,
+  createClient,
+  updateClient,
+  deleteClient,
+} from './clientsService';
 
 export default function ClientsPage() {
   const navigate = useNavigate();
   const [list, setList] = useState([]);
   const [form, setForm] = useState({ id: null, nome: '', setor: '' });
   const [error, setError] = useState(null);
+  const [remoteError, setRemoteError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => setList(load('clientes', [])), []);
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setRemoteError('');
+    try {
+      const data = await listClients();
+      setList(data);
+    } catch (err) {
+      setRemoteError(
+        err?.message || 'Não foi possível carregar a lista de clientes.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
-  const persist = (next) => {
-    setList(next);
-    save('clientes', next);
-  };
-
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setRemoteError('');
 
     if (!form.nome.trim()) {
       setError('Por favor, insira um nome para o cliente');
       return;
     }
 
-    if (form.id) {
-      // Editando cliente existente
-      const updatedList = list.map((c) =>
-        c.id === form.id ? { ...c, ...form } : c,
-      );
-      persist(updatedList);
-    } else {
-      // Criando novo cliente
-      const newId = uid();
-      const novoCliente = { id: newId, nome: form.nome, setor: form.setor };
-      persist([novoCliente, ...list]);
+    setSubmitting(true);
+    const payload = { nome: form.nome, setor: form.setor };
+    try {
+      if (form.id) {
+        await updateClient(form.id, payload);
+      } else {
+        await createClient(payload);
+      }
+      setForm({ id: null, nome: '', setor: '' });
+      await reload();
+    } catch (err) {
+      setRemoteError(err?.message || 'Não foi possível salvar o cliente.');
+    } finally {
+      setSubmitting(false);
     }
     // Limpa o formulário
-    setForm({ id: null, nome: '', setor: '' });
   };
 
   const edit = (c) => {
-    setForm(c);
+    setForm({
+      id: c.id,
+      nome: c?.nome ?? '',
+      setor: c?.setor ?? '',
+    });
   };
 
-  const del = (id) => {
-    const next = list.filter((c) => c.id !== id);
-    persist(next);
+  const del = async (id) => {
+    setRemoteError('');
+    try {
+      await deleteClient(id);
+      await reload();
+    } catch (err) {
+      setRemoteError(err?.message || 'Não foi possível excluir o cliente.');
+    }
   };
 
   // Render
@@ -91,6 +121,26 @@ export default function ClientsPage() {
             </button>
           </div>
         </header>
+        {remoteError && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            <svg
+              className="mt-0.5 h-5 w-5 flex-shrink-0"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.5a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 8a1 1 0 100-2 1 1 0 000 2z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{remoteError}</span>
+          </div>
+        )}
         {/* Mensagem de erro */}
         {error && (
           <div
@@ -150,7 +200,10 @@ export default function ClientsPage() {
                 />
               </div>
               <div className="flex gap-2">
-                <button className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40">
+                <button
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600 dark:focus:ring-sky-700/40"
+                  disabled={submitting}
+                >
                   {/* <span className="sr-only">{form.id ? "Salvar" : "Adicionar"} cliente</span> */}
                   {form.id ? 'Salvar' : 'Adicionar'}
                 </button>
@@ -159,6 +212,7 @@ export default function ClientsPage() {
                     type="button"
                     className="inline-flex h-11 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:ring-sky-700/40"
                     onClick={() => setForm({ id: null, nome: '', setor: '' })}
+                    disabled={submitting}
                   >
                     Cancelar
                   </button>
@@ -178,7 +232,12 @@ export default function ClientsPage() {
             </div>
 
             <div className="mt-4 grid gap-3">
-              {list.length === 0 && (
+              {loading && (
+                <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                  Carregando clientes...
+                </div>
+              )}
+              {!loading && list.length === 0 && (
                 <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
                   Sem clientes ainda.
                 </div>
@@ -258,7 +317,7 @@ export default function ClientsPage() {
                           <path d="M10 11v6" />
                           <path d="M14 11v6" />
                         </svg>
-                        Excluir Cliente
+                        Excluir
                       </button>
                     </div>
                   </div>

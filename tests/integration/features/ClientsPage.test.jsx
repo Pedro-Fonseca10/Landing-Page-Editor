@@ -22,11 +22,11 @@ describe('ClientsPage (integration)', () => {
     localStorage.clear();
   });
 
-  it('mostra mensagem de lista vazia quando não há clientes', () => {
+  it('mostra mensagem de lista vazia quando não há clientes', async () => {
     renderClients();
 
-    expect(screen.getByText('Sem clientes ainda.')).toBeInTheDocument();
-    expect(screen.getByText('Total: 0')).toBeInTheDocument();
+    expect(await screen.findByText('Sem clientes ainda.')).toBeInTheDocument();
+    expect(await screen.findByText('Total: 0')).toBeInTheDocument();
   });
 
   it('carrega clientes salvos e exibe dados básicos', async () => {
@@ -41,12 +41,13 @@ describe('ClientsPage (integration)', () => {
     renderClients();
 
     expect(await screen.findByText('Pedro')).toBeInTheDocument();
-    expect(screen.getByText('Tecnologia')).toBeInTheDocument();
+    expect(await screen.findByText('Tecnologia')).toBeInTheDocument();
     expect(await screen.findByText('Total: 2')).toBeInTheDocument();
   });
 
   it('valida o formulário e persiste novo cliente', async () => {
     renderClients();
+    await screen.findByText('Sem clientes ainda.');
 
     const [submitButton] = screen.getAllByRole('button', { name: 'Adicionar' });
     fireEvent.click(submitButton);

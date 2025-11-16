@@ -28,11 +28,11 @@ describe('LandingPagesPage (integration)', () => {
     vi.clearAllMocks();
   });
 
-  it('mostra mensagem vazia e total 0 quando não há landing pages', () => {
+  it('mostra mensagem vazia e total 0 quando não há landing pages', async () => {
     renderPage();
 
-    expect(screen.getByText('Sem landing pages ainda.')).toBeInTheDocument();
-    expect(screen.getByText('Total: 0')).toBeInTheDocument();
+    expect(await screen.findByText('Sem landing pages ainda.')).toBeInTheDocument();
+    expect(await screen.findByText('Total: 0')).toBeInTheDocument();
   });
 
   it('renderiza lista com cliente vinculado e nome do template', async () => {
@@ -52,7 +52,7 @@ describe('LandingPagesPage (integration)', () => {
     expect(await screen.findByText('LP Demo')).toBeInTheDocument();
     expect(screen.getByText(/Cliente: Cliente XPTO/)).toBeInTheDocument();
     expect(screen.getByText(/Template: Evento\/Curso/)).toBeInTheDocument();
-    expect(screen.getByText('Total: 1')).toBeInTheDocument();
+    expect(await screen.findByText('Total: 1')).toBeInTheDocument();
   });
 
   it('valida título e cliente obrigatórios antes de salvar', async () => {
@@ -90,6 +90,7 @@ describe('LandingPagesPage (integration)', () => {
     fireEvent.change(screen.getByLabelText('Título'), {
       target: { value: 'LP Nova' },
     });
+    await screen.findByText('Cliente XPTO');
     fireEvent.change(screen.getByLabelText('Cliente'), {
       target: { value: 'c1' },
     });

@@ -3,26 +3,26 @@
 */
 
 import { useMemo, useRef, useState } from 'react';
-import { Repo } from '../../lib/repo';
-import { uid } from '../../lib/uid';
 import { logEvent } from '../analytics/analytics';
+import { createSignup } from '../signups/signupsService';
 
-export default function SignupButton({ lpId, lpSlug }) {
+export default function SignupButton({ lpId, lpSlug, clientId }) {
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const formRef = useRef(null);
 
-  // Abre o pop-up de cadastro
   const toggle = () => {
     const next = !open;
     setOpen(next);
     if (next) logEvent('signup_open', { lp_id: lpId, lp_slug: lpSlug });
   };
-  // Salva o nome e o email
-  const onSubmit = (e) => {
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSubmitting(true);
 
     const fd = new FormData(e.currentTarget);
     const nome = String(fd.get('nome') || '').trim();
@@ -36,6 +36,7 @@ export default function SignupButton({ lpId, lpSlug }) {
         status: 'error',
         reason: 'missing_fields',
       });
+      setSubmitting(false);
       return;
     }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -46,56 +47,19 @@ export default function SignupButton({ lpId, lpSlug }) {
         status: 'error',
         reason: 'invalid_email',
       });
+      setSubmitting(false);
       return;
     }
-
-    // Checa se já está cadastrado
-    const all = Repo.list('cadastros');
-    const emailLower = email.toLowerCase();
-    const nomeLower = nome.toLowerCase();
-    const exact = all.find(
-      (x) =>
-        String(x.email || '').toLowerCase() === emailLower &&
-        String(x.nome || '')
-          .trim()
-          .toLowerCase() === nomeLower,
-    );
-    if (exact) {
-      setError('Você já está cadastrado com este nome e e-mail');
-      logEvent('signup_submit', {
-        lp_id: lpId,
-        lp_slug: lpSlug,
-        status: 'error',
-        reason: 'duplicate_exact',
-      });
-      return;
-    }
-    const emailOnly = all.find(
-      (x) => String(x.email || '').toLowerCase() === emailLower,
-    );
-    if (emailOnly) {
-      setError('Este e-mail já está cadastrado');
-      logEvent('signup_submit', {
-        lp_id: lpId,
-        lp_slug: lpSlug,
-        status: 'error',
-        reason: 'duplicate_email',
-      });
-      return;
-    }
-
-    const record = {
-      id: uid(),
-      nome,
-      email,
-      lp_id: lpId,
-      lp_slug: lpSlug,
-      createdAt: new Date().toISOString(),
-      source: 'signup_button',
-    };
 
     try {
-      Repo.add('cadastros', record);
+      await createSignup({
+        nome,
+        email,
+        lpId,
+        clientId,
+        lpSlug,
+        source: 'signup_button',
+      });
       setSent(true);
       logEvent('signup_submit', {
         lp_id: lpId,
@@ -109,20 +73,21 @@ export default function SignupButton({ lpId, lpSlug }) {
       }, 1800);
     } catch (err) {
       console.error('Erro ao salvar cadastro', err);
-      setError('Não foi possível salvar. Tente novamente.');
+      setError(err?.message || 'Não foi possível salvar. Tente novamente.');
       logEvent('signup_submit', {
         lp_id: lpId,
         lp_slug: lpSlug,
         status: 'error',
         reason: 'save_failed',
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const disabled = useMemo(() => !lpId, [lpId]);
+  const disabled = useMemo(() => !lpId || !clientId, [lpId, clientId]);
   if (disabled) return null;
 
-  // Render
   return (
     <>
       <button
@@ -225,7 +190,8 @@ export default function SignupButton({ lpId, lpSlug }) {
                 )}
                 <button
                   type="submit"
-                  className="mt-1 inline-flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 dark:border-sky-700 dark:bg-sky-600 dark:hover:bg-sky-500 dark:focus:ring-sky-700/40"
+                  className="mt-1 inline-flex items-center justify-center gap-2 rounded-lg border border-sky-300 bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-300 disabled:opacity-60 dark:border-sky-700 dark:bg-sky-600 dark:hover:bg-sky-500 dark:focus:ring-sky-700/40"
+                  disabled={submitting}
                 >
                   Enviar
                 </button>

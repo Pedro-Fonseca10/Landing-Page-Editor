@@ -5,30 +5,38 @@
 */
 
 import { Link } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import AppFooter from '../components/AppFooter';
 import { useAuth } from '../features/auth/useAuth';
-import { Repo } from '../lib/repo';
+import { fetchDashboardCounts } from '../features/dashboard/dashboardService';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const displayName = user?.email || 'Usuário';
   const [counts, setCounts] = useState({ clientes: 0, lps: 0, cadastros: 0 });
+  const [loadingCounts, setLoadingCounts] = useState(true);
+  const [remoteError, setRemoteError] = useState('');
 
-  const reload = () => {
-    const clientes = Repo.list('clientes');
-    const lps = Repo.list('lps');
-    const cadastros = Repo.list('cadastros');
-    setCounts({
-      clientes: clientes.length,
-      lps: lps.length,
-      cadastros: cadastros.length,
-    });
-  };
+  const reload = useCallback(async () => {
+    setLoadingCounts(true);
+    setRemoteError('');
+    try {
+      const dbCounts = await fetchDashboardCounts();
+      setCounts(dbCounts);
+    } catch (err) {
+      setRemoteError(
+        err?.message || 'Não foi possível carregar os indicadores do dashboard.',
+      );
+    } finally {
+      setLoadingCounts(false);
+    }
+  }, []);
 
   useEffect(() => {
     reload();
-  }, []);
+  }, [reload]);
+
+  const summaryStatus = loadingCounts ? 'Sincronizando...' : 'Atualizado agora';
 
   // Render
   return (
@@ -80,6 +88,28 @@ export default function Dashboard() {
             Selecione uma seção para começar.
           </p>
         </header>
+        {remoteError && (
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200"
+          >
+            <svg
+              className="mt-0.5 h-4 w-4 flex-shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+            <span>{remoteError}</span>
+          </div>
+        )}
 
         <section
           aria-label="Resumo rápido"
@@ -115,7 +145,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Atualizado agora
+              {summaryStatus}
             </p>
           </div>
 
@@ -148,7 +178,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Atualizado agora
+              {summaryStatus}
             </p>
           </div>
 
@@ -180,7 +210,7 @@ export default function Dashboard() {
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              Coletados via LPs
+              {loadingCounts ? 'Sincronizando...' : 'Coletados via LPs'}
             </p>
           </div>
         </section>

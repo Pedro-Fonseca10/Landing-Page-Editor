@@ -21,28 +21,28 @@ export default function TemplateRenderer({ lp }) {
       return (
         <>
           <SaaSTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
+          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
         </>
       );
     case 'evento':
       return (
         <>
           <EventoTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
+          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
         </>
       );
     case 'd2c':
       return (
         <>
           <D2CTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
+          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
         </>
       );
     case 'waitlist':
       return (
         <>
           <WaitlistTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
+          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
         </>
       );
     default: {
@@ -80,7 +80,7 @@ export default function TemplateRenderer({ lp }) {
           <footer className="max-w-5xl mx-auto p-6 text-sm text-gray-500">
             © {new Date().getFullYear()}
           </footer>
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} />
+          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
         </div>
       );
     }
