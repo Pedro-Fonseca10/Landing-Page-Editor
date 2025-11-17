@@ -1462,7 +1462,7 @@ export default function LandingPageEditor() {
                   <div className="grid gap-4">
                     {heroStats.map((stat, i) => (
                       <div
-                        key={`${stat?.label || 'stat'}-${i}`}
+                        key={`d2c-hero-stat-${i}`}
                         className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                       >
                         <div className="flex justify-between gap-4">
@@ -1525,7 +1525,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {highlights.map((item, i) => (
                     <div
-                      key={`${item?.title || 'highlight'}-${i}`}
+                      key={`d2c-highlight-${i}`}
                       className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                     >
                       <div className="flex items-center justify-between">
@@ -1651,7 +1651,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-6">
                   {bundles.map((bundle, i) => (
                     <div
-                      key={`${bundle?.id || 'bundle'}-${i}`}
+                      key={`d2c-bundle-${i}`}
                       className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                     >
                       <div className="flex items-center justify-between">
@@ -1787,7 +1787,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
                   {testimonials.map((dep, i) => (
                     <div
-                      key={`${dep?.name || 'testimonial'}-${i}`}
+                      key={`d2c-testimonial-${i}`}
                       className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                     >
                       <div className="flex items-center justify-between">
@@ -1921,9 +1921,9 @@ export default function LandingPageEditor() {
                       </button>
                     </div>
                     <div className="grid gap-3">
-                      {faq.map((item, i) => (
-                        <div
-                          key={`${item?.question || 'faq'}-${i}`}
+                  {faq.map((item, i) => (
+                    <div
+                      key={`d2c-faq-${i}`}
                           className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900"
                         >
                           <div className="grid gap-1.5">
@@ -2184,7 +2184,7 @@ export default function LandingPageEditor() {
                 <div className="mt-6 grid gap-3">
                   {navLinks.map((link, i) => (
                     <div
-                      key={`${link?.label || 'link'}-${i}`}
+                      key={`evento-link-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -2364,7 +2364,7 @@ export default function LandingPageEditor() {
                 <div className="mt-3 grid gap-3 md:grid-cols-3">
                   {heroStats.map((stat, i) => (
                     <div
-                      key={`${stat?.label || 'stat'}-${i}`}
+                      key={`evento-hero-stat-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -2457,7 +2457,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {highlightItems.map((item, i) => (
                     <div
-                      key={`${item?.title || 'highlight'}-${i}`}
+                      key={`evento-highlight-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -2564,7 +2564,7 @@ export default function LandingPageEditor() {
                     const slots = Array.isArray(day?.slots) ? day.slots : [];
                     return (
                       <div
-                        key={`${day?.label || 'day'}-${dayIndex}`}
+                        key={`evento-day-${dayIndex}`}
                         className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                       >
                         <div className="flex items-center justify-between">
@@ -2612,7 +2612,7 @@ export default function LandingPageEditor() {
                         <div className="mt-3 grid gap-3">
                           {slots.map((slot, slotIndex) => (
                             <div
-                              key={`${slot?.title || 'slot'}-${slotIndex}`}
+                              key={`evento-slot-${dayIndex}-${slotIndex}`}
                               className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
                             >
                               <div className="flex items-center justify-between">
@@ -2718,7 +2718,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {speakersList.map((speaker, i) => (
                     <div
-                      key={`${speaker?.name || 'speaker'}-${i}`}
+                      key={`evento-speaker-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -2862,7 +2862,7 @@ export default function LandingPageEditor() {
                       : [];
                     return (
                       <div
-                        key={`${plan?.name || 'plan'}-${i}`}
+                        key={`evento-ticket-${i}`}
                         className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                       >
                         <div className="flex items-center justify-between">
@@ -3014,7 +3014,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {partnerLogos.map((partner, i) => (
                     <div
-                      key={`${partner?.name || 'partner'}-${i}`}
+                      key={`evento-partner-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -3139,7 +3139,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-4 md:grid-cols-2">
                   {testimonials.map((item, i) => (
                     <div
-                      key={`${item?.name || 'testimonial'}-${i}`}
+                      key={`evento-testimonial-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -3287,7 +3287,7 @@ export default function LandingPageEditor() {
                 <div className="mt-4 grid gap-3">
                   {faq.map((item, i) => (
                     <div
-                      key={`${item?.q || 'faq'}-${i}`}
+                      key={`evento-faq-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -3818,7 +3818,7 @@ export default function LandingPageEditor() {
                   )}
                   {heroBullets.map((item, i) => (
                     <div
-                      key={`${item?.title || 'bullet'}-${i}`}
+                      key={`waitlist-bullet-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -3907,7 +3907,7 @@ export default function LandingPageEditor() {
                   )}
                   {heroStats.map((item, i) => (
                     <div
-                      key={`${item?.label || 'stat'}-${i}`}
+                      key={`waitlist-stat-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -3994,7 +3994,7 @@ export default function LandingPageEditor() {
                   )}
                   {highlights.map((item, i) => (
                     <div
-                      key={`${item?.title || 'highlight'}-${i}`}
+                      key={`waitlist-highlight-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -4100,7 +4100,7 @@ export default function LandingPageEditor() {
                   )}
                   {milestones.map((item, i) => (
                     <div
-                      key={`${item?.title || 'milestone'}-${i}`}
+                      key={`waitlist-milestone-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -4223,7 +4223,7 @@ export default function LandingPageEditor() {
                   )}
                   {perks.map((item, i) => (
                     <div
-                      key={`${item?.title || 'perk'}-${i}`}
+                      key={`waitlist-perk-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
@@ -4404,7 +4404,7 @@ export default function LandingPageEditor() {
                       )}
                       {socialQuotes.map((quote, i) => (
                         <div
-                          key={`${quote?.author || 'quote'}-${i}`}
+                          key={`waitlist-quote-${i}`}
                           className="rounded-xl border border-slate-200 p-3 dark:border-slate-700"
                         >
                           <div className="flex items-center justify-between">
@@ -4598,7 +4598,7 @@ export default function LandingPageEditor() {
                   )}
                   {faqList.map((item, i) => (
                     <div
-                      key={`${item?.q || 'faq'}-${i}`}
+                      key={`waitlist-faq-${i}`}
                       className="rounded-2xl border border-slate-200 p-4 dark:border-slate-700"
                     >
                       <div className="flex items-center justify-between">
