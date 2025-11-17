@@ -10,39 +10,48 @@ import D2CTemplate from '../templates/d2c/D2CTemplate';
 import WaitlistTemplate from '../templates/waitlist/WaitlistTemplate';
 import SignupButton from './SignupButton';
 
-export default function TemplateRenderer({ lp }) {
+export default function TemplateRenderer({ lp, showSignupButton = true }) {
   useEffect(() => {
     if (lp?.id) logEvent('page_view', { lp_id: lp.id });
   }, [lp?.id]);
   if (!lp) return null;
+
+  const signup =
+    showSignupButton && lp?.id && lp?.slug ? (
+      <SignupButton
+        lpId={lp.id}
+        lpSlug={lp.slug}
+        clientId={lp.cliente_id}
+      />
+    ) : null;
 
   switch (lp.id_template) {
     case 'saas':
       return (
         <>
           <SaaSTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
+          {signup}
         </>
       );
     case 'evento':
       return (
         <>
           <EventoTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
+          {signup}
         </>
       );
     case 'd2c':
       return (
         <>
           <D2CTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
+          {signup}
         </>
       );
     case 'waitlist':
       return (
         <>
           <WaitlistTemplate lp={lp} />
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
+          {signup}
         </>
       );
     default: {
@@ -80,7 +89,7 @@ export default function TemplateRenderer({ lp }) {
           <footer className="max-w-5xl mx-auto p-6 text-sm text-gray-500">
             © {new Date().getFullYear()}
           </footer>
-          <SignupButton lpId={lp.id} lpSlug={lp.slug} clientId={lp.cliente_id} />
+          {signup}
         </div>
       );
     }
